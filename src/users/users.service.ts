@@ -45,6 +45,12 @@ export class UsersService {
     });
   }
 
+  async findOneByEmail(email: string) {
+    return this.prisma.users.findUnique({
+      where: { email },
+    });
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto) {
     if (updateUserDto.password) {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
