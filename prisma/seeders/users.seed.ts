@@ -1,17 +1,20 @@
 import { PrismaClient } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
+import * as bcrypt from 'bcrypt';
 
 export async function seedUsers(prisma: PrismaClient) {
-
-  // Seed Doctors
+  const password = await bcrypt.hash("password123", 10);
   await prisma.users.createMany({
     data: [
         {
-            "email": "user1@example.com",
-            "password": "password123",
+          "id":  uuidv4(),
+          "email": "user1@example.com",
+          "password": password,
         },
         {
-            "email": "user2@example.com",
-            "password": "password123",
+          "id":  uuidv4(),
+          "email": "user2@example.com",
+          "password": password,
         },
   ]
   });
