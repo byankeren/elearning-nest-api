@@ -6,6 +6,7 @@ import * as passport from 'passport';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { SwaggerCustomOptions } from '@nestjs/swagger/dist/interfaces/swagger-custom-options.interface';
+import { ValidationPipe } from '@nestjs/common'; // Import ValidationPipe
 
 interface User {
   id: string; // or your appropriate type
@@ -13,10 +14,17 @@ interface User {
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.useStaticAssets(join(__dirname, '..', 'public')); // Serve static files
+
+  // Serve static files
+  app.useStaticAssets(join(__dirname, '..', 'public'));
+
+  // Enable CORS
   app.enableCors({
     credentials: true,
   });
+
+  // Set a global prefix for all routes
+  app.setGlobalPrefix('api'); // All endpoints will start with /api
 
   // Add session middleware
   app.use(
@@ -47,7 +55,7 @@ async function bootstrap() {
   // Setup Swagger options including Bearer auth
   const config = new DocumentBuilder()
     .setTitle('API')
-    .setDescription('APIasda')
+    .setDescription('API Documentation')
     .setVersion('1.0')
     .addBearerAuth(
       {
@@ -60,7 +68,7 @@ async function bootstrap() {
       'jwt', // Name of the security scheme
     )
     .build();
-  
+
   const document = SwaggerModule.createDocument(app, config);
 
   // Custom options for Swagger UI to persist Bearer token
@@ -71,8 +79,15 @@ async function bootstrap() {
     customJs: '/swagger-custom.js', // Path to your custom script
   };
 
-  // Setup Swagger module to serve the documentation at '/docs'
-  SwaggerModule.setup('docs', app, document, customOptions);
+  // Setup Swagger module to serve the documentation at '/api/docs'
+  SwaggerModule.setup('docs', app, document, customOptions); // Updated to include /api prefix
+
+  // Enable global validation pipe
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true, // Automatically transform payloads to DTO instances
+    whitelist: true, // Strip properties that are not defined in DTOs
+    forbidNonWhitelisted: true, // Throw an error if non-whitelisted properties are present
+  }));
 
   // Start the application
   await app.listen(4000);
