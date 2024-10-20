@@ -5,8 +5,8 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
-@ApiTags('auth')
-@Controller('api/auth')
+@ApiTags('Auth')
+@Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
