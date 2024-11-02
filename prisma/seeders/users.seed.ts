@@ -6,10 +6,12 @@ export async function seedUsers(prisma: PrismaClient) {
   await prisma.users.createMany({
     data: [
         {
+          "name": "user1",
           "email": "user1@example.com",
           "password": password,
         },
         {
+          "name": "user2",
           "email": "user2@example.com",
           "password": password,
         },

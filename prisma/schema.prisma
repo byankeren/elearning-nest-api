@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -15,6 +9,7 @@ datasource db {
 
 model users {
   id         String       @id @default(uuid()) @unique
+  name       String
   email      String       @unique
   password   String
 
@@ -23,31 +18,95 @@ model users {
   deleted_at DateTime?
 
   roles      user_roles[]
+
+  posts      posts[]
 }
 
 model roles {
-  id          String       @id @default(uuid()) @unique
-  name        String       @unique
-  slug        String
+  id         String       @id @default(uuid()) @unique
+  name       String       @unique
+  slug       String
 
-  created_at  DateTime     @default(now())
-  updated_at  DateTime     @updatedAt
-  deleted_at  DateTime?
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+  deleted_at DateTime?
 
-  users   user_roles[]
+  users      user_roles[]
 }
 
 model user_roles {
-  id          String       @id @default(uuid()) @unique
-  user_id     String
-  roles_id    String
+  id         String       @id @default(uuid()) @unique
+  user_id    String
+  roles_id   String
+
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+  deleted_at DateTime?
+
+  user       users        @relation(fields: [user_id], references: [id])
+  role       roles        @relation(fields: [roles_id], references: [id])
+
+  @@unique([user_id, roles_id])
+}
+
+model galleries {
+  id         String       @id @default(uuid()) @unique
+  name       String
+  desc       String
+  img        String
+
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+}
+
+model categories {
+  id         String       @id @default(uuid()) @unique
+  img        String
+  title      String
+
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+
+  posts         post_category[]
+}
+
+model images {
+  id         String       @id @default(uuid()) @unique
+  image      String
+  post_id    String
+
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+
+  post       posts        @relation(fields: [post_id], references: [id])
+}
+
+model posts {
+  id         String       @id @default(uuid()) @unique
+  img        String
+  title      String
+  user_id    String
+  body       String
+  read_time  Int
+  views      Int
+
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+
+  user       users        @relation(fields: [user_id], references: [id])
+  images     images[]
+  categories    post_category[]
+}
+
+model post_category {
+  post_id     String
+  category_id String
 
   created_at  DateTime     @default(now())
   updated_at  DateTime     @updatedAt
-  deleted_at  DateTime?
 
-  user        users        @relation(fields: [user_id], references: [id])
-  role        roles        @relation(fields: [roles_id], references: [id])
+  post        posts        @relation(fields: [post_id], references: [id])
+  category    categories   @relation(fields: [category_id], references: [id])
 
-  @@unique([user_id, roles_id])
+  @@unique([post_id, category_id]) 
 }
