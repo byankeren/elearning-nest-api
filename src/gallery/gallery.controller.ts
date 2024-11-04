@@ -1,14 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express'; // Import diskStorage from multer
+import { diskStorage } from 'multer';
 import { GalleryService } from './gallery.service';
 import { CreateGalleryDto } from './dto/create-gallery.dto';
 import { UpdateGalleryDto } from './dto/update-gallery.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { galleries } from '@prisma/client';
+import * as path from 'path'; // Import path for file handling
 
 @ApiTags('Gallery')
 @Controller('gallery')
-// @UseGuards(AuthGuard('jwt'))
-// @ApiBearerAuth('jwt')
+// @UseGuards(AuthGuard('jwt')) // Uncomment if using JWT authentication
+// @ApiBearerAuth('jwt') // Uncomment if using JWT authentication
 export class GalleryController {
   constructor(private readonly galleryService: GalleryService) {}
 
@@ -16,9 +19,28 @@ export class GalleryController {
   @ApiOperation({ summary: 'Create a new gallery' })
   @ApiResponse({ status: 201, description: 'Gallery successfully created.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
-  async create(@Body() createGalleryDto: CreateGalleryDto): Promise<galleries> {
-    return this.galleryService.create(createGalleryDto);
-  }
+  @UseInterceptors(FileInterceptor('img', {
+    storage: diskStorage({
+      destination: './uploads',
+      filename: (req, file, cb) => {
+        const originalName = file.originalname.split('.')[0];
+        const fileExt = path.extname(file.originalname);
+        const newFileName = `${originalName}-${Date.now()}${fileExt}`;
+        cb(null, newFileName);
+      },
+    }),
+  }))
+  async create(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createGalleryDto: CreateGalleryDto
+  ) {
+    console.log(file);
+    const fileUrl = file ? `/uploads/${file.filename}` : null;
+    return await this.galleryService.create({
+      ...createGalleryDto,
+      img: fileUrl,
+    });
+  }  
 
   @Get()
   @ApiOperation({ summary: 'Get all galleries' })

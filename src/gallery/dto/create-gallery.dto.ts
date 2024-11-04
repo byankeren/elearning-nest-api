@@ -12,8 +12,6 @@ export class CreateGalleryDto {
   @IsString()
   desc: string;
 
-  @ApiProperty({ description: 'The image URL of the gallery', example: 'https://example.com/image.jpg' })
-  @IsNotEmpty()
-  @IsString()
+  @ApiProperty({ description: 'The image URL of the gallery', example: 'https://example.com/image.jpg', required: false })
   img: string;
 }

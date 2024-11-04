@@ -8,7 +8,7 @@ export class GalleryService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createGalleryDto: CreateGalleryDto) {
-    return this.prisma.galleries.create({ data: createGalleryDto });
+    return this.prisma.galleries.create({ data: createGalleryDto});
   }
 
   async findAll(limit: number = 10, page: number = 1) {
