@@ -35,7 +35,7 @@ export class GalleryController {
     @Body() createGalleryDto: CreateGalleryDto
   ) {
     console.log(file);
-    const fileUrl = file ? `/uploads/${file.filename}` : null;
+    const fileUrl = file ? `/${file.filename}` : null;
     return await this.galleryService.create({
       ...createGalleryDto,
       img: fileUrl,
