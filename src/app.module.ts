@@ -19,8 +19,7 @@ import { join } from 'path';
     GalleryModule,
     CategoriesModule,
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
-      serveRoot: '/uploads', 
+      rootPath: join(__dirname, '..', '..', 'uploads'),
     }),
   ],
   controllers: [AppController],
