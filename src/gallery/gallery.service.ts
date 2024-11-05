@@ -11,14 +11,23 @@ export class GalleryService {
     return this.prisma.galleries.create({ data: createGalleryDto});
   }
 
-  async findAll(limit: number = 10, page: number = 1) {
+  async findAll(limit: number = 10, page: number = 1, category_id: string) {
     const skip = (page - 1) * limit;
+    const where = {...(category_id ? {
+      categories: {
+        some: {
+          category_id: category_id,
+        },
+      },
+    } : {})}
     const [data, total] = await Promise.all([
       this.prisma.galleries.findMany({
+        where,
         skip: skip,
         take: limit,
+        include: {categories: true}
       }),
-      this.prisma.galleries.count(),
+      this.prisma.galleries.count({where}),
     ]);
 
     return {

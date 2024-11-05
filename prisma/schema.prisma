@@ -8,105 +8,121 @@ datasource db {
 }
 
 model users {
-  id         String       @id @default(uuid()) @unique
-  name       String
-  email      String       @unique
-  password   String
+  id       String @id @unique @default(uuid())
+  name     String
+  email    String @unique
+  password String
 
-  created_at DateTime     @default(now())
-  updated_at DateTime     @updatedAt
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
   deleted_at DateTime?
 
-  roles      user_roles[]
+  roles user_roles[]
 
-  posts      posts[]
+  posts posts[]
 }
 
 model roles {
-  id         String       @id @default(uuid()) @unique
-  name       String       @unique
-  slug       String
+  id   String @id @unique @default(uuid())
+  name String @unique
+  slug String
 
-  created_at DateTime     @default(now())
-  updated_at DateTime     @updatedAt
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
   deleted_at DateTime?
 
-  users      user_roles[]
+  users user_roles[]
 }
 
 model user_roles {
-  id         String       @id @default(uuid()) @unique
-  user_id    String
-  roles_id   String
+  id       String @id @unique @default(uuid())
+  user_id  String
+  roles_id String
 
-  created_at DateTime     @default(now())
-  updated_at DateTime     @updatedAt
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
   deleted_at DateTime?
 
-  user       users        @relation(fields: [user_id], references: [id])
-  role       roles        @relation(fields: [roles_id], references: [id])
+  user users @relation(fields: [user_id], references: [id])
+  role roles @relation(fields: [roles_id], references: [id])
 
   @@unique([user_id, roles_id])
 }
 
 model galleries {
-  id         String       @id @default(uuid()) @unique
-  name       String
-  desc       String
-  img        String
+  id   String @id @unique @default(uuid())
+  name String
+  desc String
+  img  String
 
-  created_at DateTime     @default(now())
-  updated_at DateTime     @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  categories gallery_categories[]
 }
 
 model categories {
-  id         String       @id @default(uuid()) @unique
-  img        String
-  title      String
+  id    String @id @unique @default(uuid())
+  img   String
+  title String
 
-  created_at DateTime     @default(now())
-  updated_at DateTime     @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  posts         post_category[]
+  posts     post_category[]
+  galleries gallery_categories[]
 }
 
 model images {
-  id         String       @id @default(uuid()) @unique
-  image      String
-  post_id    String
+  id      String @id @unique @default(uuid())
+  image   String
+  post_id String
 
-  created_at DateTime     @default(now())
-  updated_at DateTime     @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  post       posts        @relation(fields: [post_id], references: [id])
+  post posts @relation(fields: [post_id], references: [id])
 }
 
 model posts {
-  id         String       @id @default(uuid()) @unique
-  img        String
-  title      String
-  user_id    String
-  body       String
-  read_time  Int
-  views      Int
+  id        String @id @unique @default(uuid())
+  img       String
+  title     String
+  user_id   String
+  body      String
+  read_time Int
+  views     Int
 
-  created_at DateTime     @default(now())
-  updated_at DateTime     @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  user       users        @relation(fields: [user_id], references: [id])
+  user       users           @relation(fields: [user_id], references: [id])
   images     images[]
-  categories    post_category[]
+  categories post_category[]
+}
+
+model gallery_categories {
+  gallery_id  String
+  category_id String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  gallery  galleries  @relation(fields: [gallery_id], references: [id])
+  category categories @relation(fields: [category_id], references: [id])
+
+  @@unique([gallery_id, category_id])
 }
 
 model post_category {
   post_id     String
   category_id String
 
-  created_at  DateTime     @default(now())
-  updated_at  DateTime     @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  post        posts        @relation(fields: [post_id], references: [id])
-  category    categories   @relation(fields: [category_id], references: [id])
+  post     posts      @relation(fields: [post_id], references: [id])
+  category categories @relation(fields: [category_id], references: [id])
 
-  @@unique([post_id, category_id]) 
+  @@unique([post_id, category_id])
 }

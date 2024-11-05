@@ -48,13 +48,16 @@ export class GalleryController {
   @ApiResponse({ status: 404, description: 'No galleries found.' })
   @ApiQuery({ name: 'limit', required: false, description: 'Number of galleries to return per page', example: 10 })
   @ApiQuery({ name: 'page', required: false, description: 'Page number to retrieve', example: 1 })
+  @ApiQuery({ name: 'category_id', required: false, description: 'Categories', example: 1 })
   async findAll(
     @Query('limit') limit?: string,
-    @Query('page') page?: string
-  ): Promise<{ data: galleries[]; meta: { total: number; page: number; limit: number; total_pages: number } }> {
+    @Query('page') page?: string,
+    @Query('category_id') category_id?: string
+  // ): Promise<{ data: galleries[]; meta: { total: number; page: number; limit: number; total_pages: number } }> {
+  ) {
     const limitNumber = parseInt(limit) || 10;
     const pageNumber = parseInt(page) || 1;
-    return this.galleryService.findAll(limitNumber, pageNumber);
+    return this.galleryService.findAll(limitNumber, pageNumber, category_id);
   }
 
   @Get(':id')
