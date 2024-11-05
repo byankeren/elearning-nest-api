@@ -7,9 +7,22 @@ import { RolesModule } from './roles/roles.module';
 import { PostsModule } from './posts/posts.module';
 import { GalleryModule } from './gallery/gallery.module';
 import { CategoriesModule } from './categories/categories.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
-  imports: [UsersModule, AuthModule, RolesModule, PostsModule, GalleryModule, CategoriesModule],
+  imports: [
+    UsersModule,
+    AuthModule,
+    RolesModule,
+    PostsModule,
+    GalleryModule,
+    CategoriesModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads', 
+    }),
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
