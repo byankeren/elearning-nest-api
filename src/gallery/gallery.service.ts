@@ -8,8 +8,33 @@ export class GalleryService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createGalleryDto: CreateGalleryDto) {
-    return this.prisma.galleries.create({ data: createGalleryDto});
+    const { data, categories } = createGalleryDto;
+    
+    const galleryData = {
+      name: data.name,
+      desc: data.desc,
+      img: data.img || null, // Set img to null if not provided, or omit it entirely based on your database configuration
+    };
+  
+    const gallery = await this.prisma.galleries.create({
+      data: galleryData,
+    });
+  
+    // Prepare category data for creation
+    const galleryCategoriesData = categories.map((category) => ({
+      gallery_id: gallery.id,
+      category_id: category.category_id,
+    }));
+  
+    // Create categories in bulk
+    await this.prisma.gallery_categories.createMany({
+      data: galleryCategoriesData,
+    });
+  
+    return gallery;
   }
+  
+  
 
   async findAll(limit: number = 10, page: number = 1, category_id: string) {
     const skip = (page - 1) * limit;
@@ -58,7 +83,7 @@ export class GalleryService {
 
     return this.prisma.galleries.update({
       where: { id },
-      data: updateGalleryDto,
+      data: updateGalleryDto.data,
     });
   }
 

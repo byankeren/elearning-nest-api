@@ -1,7 +1,15 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, ValidateNested, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
-export class CreateGalleryDto {
+class Category {
+  @ApiProperty({ description: 'The ID of the category', example: '1234' })
+  @IsNotEmpty()
+  @IsString()
+  category_id: string;
+}
+
+class GalleryData {
   @ApiProperty({ description: 'The name of the gallery', example: 'Art Exhibition' })
   @IsNotEmpty()
   @IsString()
@@ -13,5 +21,20 @@ export class CreateGalleryDto {
   desc: string;
 
   @ApiProperty({ description: 'The image URL of the gallery', example: 'https://example.com/image.jpg', required: false })
-  img: string;
+  @IsOptional()
+  @IsString()
+  img?: string;
+}
+
+export class CreateGalleryDto {
+  @ApiProperty({ type: GalleryData })
+  @ValidateNested()
+  @Type(() => GalleryData)
+  data: GalleryData;
+
+  @ApiProperty({ type: [Category], description: 'An array of categories' })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => Category)
+  categories: Category[];
 }

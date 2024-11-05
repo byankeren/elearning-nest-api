@@ -35,12 +35,23 @@ export class GalleryController {
     @Body() createGalleryDto: CreateGalleryDto
   ) {
     console.log(file);
+    
+    // Build the URL for the uploaded file
     const fileUrl = file ? `/${file.filename}` : null;
-    return await this.galleryService.create({
+  
+    // Update the img property within the data object
+    const updatedGalleryDto = {
       ...createGalleryDto,
-      img: fileUrl,
-    });
-  }  
+      data: {
+        ...createGalleryDto.data,
+        img: fileUrl, // Set the img property to the file URL
+      },
+    };
+  
+    // Pass the updated DTO to the service
+    return await this.galleryService.create(updatedGalleryDto);
+  }
+  
 
   @Get()
   @ApiOperation({ summary: 'Get all galleries' })
