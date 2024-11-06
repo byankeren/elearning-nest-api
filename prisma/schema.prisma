@@ -63,7 +63,6 @@ model galleries {
 
 model categories {
   id    String @id @unique @default(uuid())
-  img   String
   title String
 
   created_at DateTime @default(now())
