@@ -7,31 +7,48 @@ import { UpdateGalleryDto } from './dto/update-gallery.dto';
 export class GalleryService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createGalleryDto: CreateGalleryDto) {
-    const { data, categories } = createGalleryDto;
-    
+  async create(createGalleryDto: any) {
+    const { name, desc, img, categories } = createGalleryDto;
+
+    // Prepare the data for creating a new gallery entry
     const galleryData = {
-      name: data.name,
-      desc: data.desc,
-      img: data.img || null, // Set img to null if not provided, or omit it entirely based on your database configuration
+      name,
+      desc,
+      img, // Image URL from the file upload
     };
-  
-    const gallery = await this.prisma.galleries.create({
-      data: galleryData,
-    });
-  
-    // Prepare category data for creation
-    const galleryCategoriesData = categories.map((category) => ({
-      gallery_id: gallery.id,
-      category_id: category.category_id,
-    }));
-  
-    // Create categories in bulk
-    await this.prisma.gallery_categories.createMany({
-      data: galleryCategoriesData,
-    });
-  
-    return gallery;
+
+    try {
+      // Save the main gallery entry
+      const gallery = await this.prisma.galleries.create({
+        data: galleryData,
+      });
+
+      // Check if categories are provided and parse them
+      if (categories && Array.isArray(categories)) {
+        const categoryConnections = categories.map((category) => {
+          // Parse JSON if necessary
+          const parsedCategory = typeof category === 'string' ? JSON.parse(category) : category;
+
+          return {
+            gallery_id: gallery.id,
+            category_id: parsedCategory.category_id, // Ensure category_id exists
+          };
+        });
+        console.log("categoryConnections", categoryConnections)
+        // Filter out any entries where category_id is undefined
+        const validCategories = categoryConnections.filter((conn) => conn.category_id);
+        console.log("validCategories", validCategories)
+
+          const asd = await this.prisma.gallery_categories.createMany({
+            data: validCategories,
+          });
+          console.log(asd)
+      }
+
+      return gallery;
+    } catch (error) {
+      throw new Error(`Failed to create gallery: ${error.message}`);
+    }
   }
   
   

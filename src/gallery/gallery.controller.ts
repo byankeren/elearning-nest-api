@@ -32,26 +32,19 @@ export class GalleryController {
   }))
   async create(
     @UploadedFile() file: Express.Multer.File,
-    @Body() createGalleryDto: CreateGalleryDto
+    @Body() createGalleryDto: any
   ) {
-    console.log(file);
-    
-    // Build the URL for the uploaded file
+    // Construct the file URL if an image was uploaded
     const fileUrl = file ? `/${file.filename}` : null;
   
-    // Update the img property within the data object
+    // Prepare the final DTO for creating a gallery
     const updatedGalleryDto = {
       ...createGalleryDto,
-      data: {
-        ...createGalleryDto.data,
-        img: fileUrl, // Set the img property to the file URL
-      },
+      img: fileUrl, // Attach the image URL directly at the root level
     };
   
-    // Pass the updated DTO to the service
     return await this.galleryService.create(updatedGalleryDto);
-  }
-  
+  }  
 
   @Get()
   @ApiOperation({ summary: 'Get all galleries' })

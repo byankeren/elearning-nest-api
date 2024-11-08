@@ -31,6 +31,24 @@ export class CategoriesService {
     };
   }
 
+  async findPosts(id: string) {
+    const category = await this.prisma.galleries.findMany({
+      where: { 
+        categories: {
+          some: {
+            category_id: id
+          }
+        }
+       },
+    });
+
+    if (!category) {
+      throw new NotFoundException(`Category with ID ${id} not found`);
+    }
+
+    return category;
+  }
+
   async findOne(id: string) {
     const category = await this.prisma.categories.findUnique({
       where: { id },

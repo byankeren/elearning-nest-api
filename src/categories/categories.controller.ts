@@ -37,6 +37,15 @@ export class CategoriesController {
     return this.categoriesService.findAll(limitNumber, pageNumber);
   }
 
+  @Get(':id/posts')
+  @ApiOperation({ summary: 'Get a category by ID' })
+  @ApiParam({ name: 'id', description: 'Category ID', required: true })
+  @ApiResponse({ status: 200, description: 'Success' })
+  @ApiResponse({ status: 404, description: 'Category not found.' })
+  async findPosts(@Param('id') id: string){
+    return this.categoriesService.findPosts(id);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a category by ID' })
   @ApiParam({ name: 'id', description: 'Category ID', required: true })
