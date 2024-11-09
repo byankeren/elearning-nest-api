@@ -95,18 +95,60 @@ export class GalleryService {
     return gallery;
   }
 
-  async update(id: string, updateGalleryDto: UpdateGalleryDto) {
-    await this.findOne(id); // Ensure gallery exists
-
-    return this.prisma.galleries.update({
-      where: { id },
-      data: updateGalleryDto.data,
+  async update(id: string, updateGalleryDto: any) {
+    const { img, categories, ...otherData } = updateGalleryDto;
+  
+    // Log the other data to debug
+    console.log(otherData);
+  
+    // Delete existing gallery-category relations
+    await this.prisma.gallery_categories.deleteMany({
+      where: {
+        gallery_id: id,
+      },
     });
-  }
+  
+    // If categories are provided, create new gallery-category relations
+    if (categories && Array.isArray(categories)) {
+      // Map over the categories and prepare the data
+      const categoryConnections = categories.map((category) => {
+        // Parse category string if necessary
+        const parsedCategory = typeof category === 'string' ? JSON.parse(category) : category;
+  
+        return {
+          gallery_id: id,
+          category_id: parsedCategory.category_id, // Ensure category_id exists
+        };
+      });
+  
+      // Filter out any invalid categories
+      const validCategories = categoryConnections.filter((conn) => conn.category_id);
+  
+      // Create new gallery-category relations in bulk
+      await this.prisma.gallery_categories.createMany({
+        data: validCategories,
+      });
+    }
+  
+    // Update the gallery with the new data
+    const gallery = await this.prisma.galleries.update({
+      where: { id },
+      data: {
+        name: otherData.name,
+        desc: otherData.desc,
+        img: img || undefined, // Only update the image if a new one is provided
+      },
+    });
+  
+    return gallery;
+  }  
+  
 
   async remove(id: string) {
     await this.findOne(id); // Ensure gallery exists
-
+    await this.prisma.gallery_categories.deleteMany({
+      where: {gallery_id: id}
+    })
     return this.prisma.galleries.delete({
       where: { id },
     });

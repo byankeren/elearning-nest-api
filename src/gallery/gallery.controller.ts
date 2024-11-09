@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UploadedFile, UseInterceptors, NotFoundException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express'; // Import diskStorage from multer
 import { diskStorage } from 'multer';
 import { GalleryService } from './gallery.service';
@@ -79,9 +79,39 @@ export class GalleryController {
   @ApiResponse({ status: 200, description: 'Gallery successfully updated.' })
   @ApiResponse({ status: 404, description: 'Gallery not found.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
-  async update(@Param('id') id: string, @Body() updateGalleryDto: UpdateGalleryDto): Promise<galleries> {
-    return this.galleryService.update(id, updateGalleryDto);
-  }
+  @UseInterceptors(FileInterceptor('img', {
+    storage: diskStorage({
+      destination: './uploads',
+      filename: (req, file, cb) => {
+        const originalName = file.originalname.split('.')[0];
+        const fileExt = path.extname(file.originalname);
+        const newFileName = `${originalName}-${Date.now()}${fileExt}`;
+        cb(null, newFileName);
+      },
+    }),
+  }))
+  async update(
+    @Param('id') id: string,
+    @Body() updateGalleryDto: any,
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    // Construct the file URL if a new image was uploaded
+    const fileUrl = file ? `/${file.filename}` : null;
+    
+    // Prepare the updated gallery DTO
+    const updatedGalleryDto = {
+      ...updateGalleryDto,
+      img: fileUrl, // Attach the new image URL if available, otherwise keep the old one
+    };
+  
+    // Ensure gallery exists before updating
+    const gallery = await this.galleryService.findOne(id);
+    if (!gallery) {
+      throw new NotFoundException(`Gallery with ID ${id} not found`);
+    }
+  
+    return this.galleryService.update(id, updatedGalleryDto);
+  }  
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a gallery by ID' })
