@@ -10,19 +10,31 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
+  // Validate user credentials
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersService.findOneByEmail(email);
     if (user && await bcrypt.compare(password, user.password)) {
-      const { password, ...result } = user;
+      const { password, ...result } = user;  // Don't return the password
       return result;
     }
-    return null;
+    return null;  // Return null if user is not found or password doesn't match
   }
 
-  async login(user: any) {
+  // Login logic: Validate user and return JWT
+  async login(email: string, password: string) {
+    const user = await this.validateUser(email, password);
+    
+    // If user validation failed
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Create the payload for JWT
     const payload = { email: user.email, sub: user.id };
+    
+    // Generate JWT and return it with the user details
     return {
-      access_token: this.jwtService.sign(payload, { expiresIn: '1h' }), // expires in 1 year
+      access_token: this.jwtService.sign(payload, { expiresIn: '1h' }),  // expires in 1 hour
       user: user
     };
   }
