@@ -46,7 +46,7 @@ export class CategoriesService {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
 
-    return category;
+    return {data: category};
   }
 
   async findOne(id: string) {
