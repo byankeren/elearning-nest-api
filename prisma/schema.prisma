@@ -50,7 +50,7 @@ model user_roles {
 }
 
 model galleries {
-  id   String @id @unique @default(uuid())
+  id   String  @id @unique @default(uuid())
   name String
   desc String
   img  String?
@@ -84,20 +84,33 @@ model images {
 }
 
 model posts {
-  id        String @id @unique @default(uuid())
-  img       String
+  id        String  @id @unique @default(uuid())
+  img       String?
   title     String
+  slug      String
   user_id   String
-  body      String
-  read_time Int
-  views     Int
+  desc      String
+  read_time Int?
+  views     Int?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  user       users           @relation(fields: [user_id], references: [id])
-  images     images[]
-  categories post_category[]
+  user         users           @relation(fields: [user_id], references: [id])
+  images       images[]
+  categories   post_category[]
+  post_details post_details[]
+}
+
+model post_details {
+  id      String @id @unique @default(uuid())
+  post_id String
+  content String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  post posts @relation(fields: [post_id], references: [id])
 }
 
 model gallery_categories {
@@ -127,14 +140,13 @@ model post_category {
 }
 
 model contact_us {
-  id            String @id @unique @default(uuid())
-  guest_name    String
-  guest_email   String
+  id          String @id @unique @default(uuid())
+  guest_name  String
+  guest_email String
 
   subject       String
   guest_message String
 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
-

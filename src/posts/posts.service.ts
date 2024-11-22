@@ -7,10 +7,59 @@ import { UpdatePostDto } from './dto/update-post.dto';
 export class PostsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createPostDto: CreatePostDto) {
-    return this.prisma.posts.create({
-      data: createPostDto,
-    });
+  async create(createPostDto: any) {
+    const { user_id, title, desc, content, img, categories } = createPostDto;
+    const slug = title.toLowerCase().split(" ").join("-")
+    // Prepare the data for creating a new gallery entry
+    const postData = {
+      title,
+      slug,
+      user_id,
+      desc,
+      img, // Image URL from the file upload
+    };
+
+    try {
+      // Save the main gallery entry
+      const post = await this.prisma.posts.create({
+        data: postData,
+      });
+
+      const detail = await this.prisma.post_details.create({
+        data: {
+          content,
+          post_id: post.id
+        }
+      })
+
+      // user_id
+
+      // Check if categories are provided and parse them
+      if (categories && Array.isArray(categories)) {
+        const categoryConnections = categories.map((category) => {
+          // Parse JSON if necessary
+          const parsedCategory = typeof category === 'string' ? JSON.parse(category) : category;
+
+          return {
+            post_id: post.id,
+            category_id: parsedCategory.category_id, // Ensure category_id exists
+          };
+        });
+        console.log("categoryConnections", categoryConnections)
+        // Filter out any entries where category_id is undefined
+        const validCategories = categoryConnections.filter((conn) => conn.category_id);
+        console.log("validCategories", validCategories)
+
+          const asd = await this.prisma.post_category.createMany({
+            data: validCategories,
+          });
+          console.log(asd)
+      }
+
+      return post;
+    } catch (error) {
+      throw new Error(`Failed to create gallery: ${error.message}`);
+    }
   }
 
   async findAll(limit: number = 10, page: number = 1) {
@@ -56,13 +105,65 @@ export class PostsService {
     return post;
   }
 
-  async update(id: string, updatePostDto: UpdatePostDto) {
-    await this.findOne(id);
-
-    return this.prisma.posts.update({
-      where: { id },
-      data: updatePostDto,
+  async update(id: string, updatePostDto: any) {
+    const { user_id, title, desc, content, img, categories } = updatePostDto;
+    const slug = title.toLowerCase().split(" ").join("-")
+    // Prepare the data for creating a new gallery entry
+    const postData = {
+      title,
+      slug,
+      user_id,
+      desc,
+      img, // Image URL from the file upload
+    };
+  
+    // Delete existing gallery-category relations
+    await this.prisma.post_category.deleteMany({
+      where: {
+        post_id: id,
+      },
     });
+  
+    // If categories are provided, create new gallery-category relations
+    if (categories && Array.isArray(categories)) {
+      // Map over the categories and prepare the data
+      const categoryConnections = categories.map((category) => {
+        // Parse category string if necessary
+        const parsedCategory = typeof category === 'string' ? JSON.parse(category) : category;
+  
+        return {
+          post_id: id,
+          category_id: parsedCategory.category_id, // Ensure category_id exists
+        };
+      });
+  
+      // Filter out any invalid categories
+      const validCategories = categoryConnections.filter((conn) => conn.category_id);
+  
+      // Create new gallery-category relations in bulk
+      await this.prisma.post_category.createMany({
+        data: validCategories,
+      });
+    }
+  
+    // Update the gallery with the new data
+    const post = await this.prisma.posts.update({
+      where: { id },
+      data: {
+        title: postData.title,
+        slug: postData.slug,
+        desc: postData.desc,
+        img: img || undefined, // Only update the image if a new one is provided
+      },
+    });
+    const postDetail = await this.prisma.post_details.update({
+      where: { id },
+      data: {
+        content: content,
+      },
+    });
+  
+    return post;
   }
 
   async remove(id: string) {

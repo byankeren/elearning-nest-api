@@ -1,10 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express'; // Import diskStorage from multer
+import { diskStorage } from 'multer';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PostResponseDto } from './dto/post-response.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { posts } from '@prisma/client';
+import * as path from 'path'; // Import path for file handling
 import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Posts')
@@ -18,9 +21,33 @@ export class PostsController {
   @ApiOperation({ summary: 'Create a new post' })
   @ApiResponse({ status: 201, description: 'Post successfully created.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
-  async create(@Body() createPostDto: CreatePostDto): Promise<posts> {
-    return this.postsService.create(createPostDto);
-  }
+  @UseInterceptors(FileInterceptor('img', {
+    storage: diskStorage({
+      destination: './uploads',
+      filename: (req, file, cb) => {
+        const originalName = file.originalname.split('.')[0];
+        const fileExt = path.extname(file.originalname);
+        const newFileName = `${originalName}-${Date.now()}${fileExt}`;
+        cb(null, newFileName);
+      },
+    }),
+  }))
+  async create(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createGalleryDto: any
+  ) {
+    // Construct the file URL if an image was uploaded
+    const fileUrl = file ? `/${file.filename}` : null;
+  
+    // Prepare the final DTO for creating a gallery
+    const updatedGalleryDto = {
+      ...createGalleryDto,
+      img: fileUrl, // Attach the image URL directly at the root level
+    };
+  
+    return await this.postsService.create(updatedGalleryDto);
+  }  
+
 
   @Get()
   @ApiOperation({ summary: 'Get all posts' })
@@ -52,7 +79,7 @@ export class PostsController {
   @ApiResponse({ status: 200, description: 'Post successfully updated.' })
   @ApiResponse({ status: 404, description: 'Post not found.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
-  async update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto): Promise<posts> {
+  async update(@Param('id') id: string, @Body() updatePostDto: any) {
     return this.postsService.update(id, updatePostDto);
   }
 
@@ -61,7 +88,7 @@ export class PostsController {
   @ApiParam({ name: 'id', description: 'Post ID', required: true })
   @ApiResponse({ status: 204, description: 'Post successfully deleted.' })
   @ApiResponse({ status: 404, description: 'Post not found.' })
-  async remove(@Param('id') id: string): Promise<posts> {
+  async remove(@Param('id') id: string) {
     return this.postsService.remove(id);
   }
 }
