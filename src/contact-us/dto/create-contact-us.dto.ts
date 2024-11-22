@@ -8,7 +8,7 @@ export class CreateContactUsDto {
   })
   @IsString()
   @IsNotEmpty()
-  guest_name: string;
+  name: string;
 
   @ApiProperty({
     description: 'The email of the guest',
@@ -16,7 +16,7 @@ export class CreateContactUsDto {
   })
   @IsEmail()
   @IsNotEmpty()
-  guest_email: string;
+  email: string;
 
   @ApiProperty({
     description: 'The subject of the message',
@@ -32,5 +32,5 @@ export class CreateContactUsDto {
   })
   @IsString()
   @IsNotEmpty()
-  guest_message: string;
+  message: string;
 }

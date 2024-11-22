@@ -14,8 +14,26 @@ export class ContactUsService {
     });
   }
 
-  async findAll() {
-    return this.prisma.contact_us.findMany();
+  async findAll(limit: number = 10, page: number = 1) {
+    const skip = (page - 1) * limit;
+  
+    const [data, total] = await Promise.all([
+      this.prisma.contact_us.findMany({
+        skip: skip,
+        take: limit,
+      }),
+      this.prisma.contact_us.count(),
+    ]);
+  
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        total_pages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async findOne(id: string) {
