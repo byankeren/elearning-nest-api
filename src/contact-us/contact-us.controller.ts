@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete,Query } from '@nestjs/common';
 import { ContactUsService } from './contact-us.service';
 import { CreateContactUsDto } from './dto/create-contact-us.dto';
 import { UpdateContactUsDto } from './dto/update-contact-us.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ContactUsResponseDto } from './dto/contactus-response.dto';
 
 @Controller('contact-us')
 @ApiTags('Contact Us')
@@ -16,9 +17,28 @@ export class ContactUsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Retrieve all contact us records' })
-  findAll() {
-    return this.contactUsService.findAll();
+  @ApiOperation({ summary: 'Get all contact messages' })
+  @ApiResponse({ status: 200, description: 'Success' })
+  @ApiResponse({ status: 404, description: 'No contact messages found.' })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Number of messages to return per page',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Page number to retrieve',
+    example: 1,
+  })
+  async findAll(
+    @Query('limit') limit?: string,
+    @Query('page') page?: string,
+  ): Promise<ContactUsResponseDto> {
+    const limitNumber = parseInt(limit) || 10;
+    const pageNumber = parseInt(page) || 1;
+    return this.contactUsService.findAll(limitNumber, pageNumber);
   }
 
   @Get(':id')

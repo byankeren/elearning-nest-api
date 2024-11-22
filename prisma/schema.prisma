@@ -140,12 +140,12 @@ model post_category {
 }
 
 model contact_us {
-  id          String @id @unique @default(uuid())
-  guest_name  String
-  guest_email String
+  id    String @id @unique @default(uuid())
+  name  String
+  email String
 
-  subject       String
-  guest_message String
+  subject String
+  message String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
