@@ -125,3 +125,16 @@ model post_category {
 
   @@unique([post_id, category_id])
 }
+
+model contact_us {
+  id            String @id @unique @default(uuid())
+  guest_name    String
+  guest_email   String
+
+  subject       String
+  guest_message String
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
