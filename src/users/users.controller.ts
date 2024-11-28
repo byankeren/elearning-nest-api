@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -6,6 +6,9 @@ import { UserResponseDto } from './dto/user-response.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { users } from '@prisma/client';
 import { AuthGuard } from '@nestjs/passport';
+import { FileInterceptor } from '@nestjs/platform-express'; // Import diskStorage from multer
+import { diskStorage } from 'multer';
+import * as path from 'path'; // Import path for file handling
 
 @ApiTags('Users')
 @Controller('users')
@@ -18,8 +21,30 @@ export class UsersController {
   @ApiOperation({ summary: 'Create a new user' })
   @ApiResponse({ status: 201, description: 'User successfully created.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
-  async create(@Body() createUserDto: CreateUserDto): Promise<users> {
-    return this.usersService.create(createUserDto);
+  @UseInterceptors(FileInterceptor('img', {
+    storage: diskStorage({
+      destination: './uploads',
+      filename: (req, file, cb) => {
+        const originalName = file.originalname.split('.')[0];
+        const fileExt = path.extname(file.originalname);
+        const newFileName = `${originalName}-${Date.now()}${fileExt}`;
+        cb(null, newFileName);
+      },
+    }),
+  }))
+  async create(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createUserDto: any
+  ){
+        // Construct the file URL if an image was uploaded
+        const fileUrl = file ? `/${file.filename}` : null;
+  
+        // Prepare the final DTO for creating a gallery
+        const updatedUserDto = {
+          ...createUserDto,
+          image: fileUrl, // Attach the image URL directly at the root level
+        };
+    return this.usersService.create(updatedUserDto);
   }
 
   @Get()
