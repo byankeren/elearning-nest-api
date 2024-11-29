@@ -10,6 +10,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { ContactUsModule } from './contact-us/contact-us.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ContactUsModule } from './contact-us/contact-us.module';
       rootPath: join(__dirname, '..', '..', 'uploads'),
     }),
     ContactUsModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
