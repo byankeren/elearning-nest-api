@@ -77,8 +77,30 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'User successfully updated.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto): Promise<users> {
-    return this.usersService.update(id, updateUserDto);
+  @UseInterceptors(FileInterceptor('img', {
+    storage: diskStorage({
+      destination: './uploads',
+      filename: (req, file, cb) => {
+        const originalName = file.originalname.split('.')[0];
+        const fileExt = path.extname(file.originalname);
+        const newFileName = `${originalName}-${Date.now()}${fileExt}`;
+        cb(null, newFileName);
+      },
+    }),
+  }))
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: any,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    // Construct the file URL if an image was uploaded
+    const fileUrl = file ? `/${file.filename}` : null
+    // Prepare the final DTO for creating a gallery
+    const updatedUserDto = {
+      ...updateUserDto,
+      image: fileUrl, // Attach the image URL directly at the root level
+    };
+    return this.usersService.update(id, updatedUserDto);
   }
 
   @Delete(':id')

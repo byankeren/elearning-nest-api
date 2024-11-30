@@ -19,6 +19,8 @@ export class PostsService {
       img, // Image URL from the file upload
     };
 
+    console.log(user_id)
+
     try {
       // Save the main gallery entry
       const post = await this.prisma.posts.create({
