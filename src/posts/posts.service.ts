@@ -74,6 +74,7 @@ export class PostsService {
           user: true, 
           images: true, 
           categories: true,
+          post_details: true,
         },
       }),
       this.prisma.posts.count(),
@@ -108,6 +109,7 @@ export class PostsService {
   }
 
   async update(id: string, updatePostDto: any) {
+    console.log(updatePostDto)
     let { user_id, title, desc, content, img, categories } = updatePostDto;
     const slug = title.toLowerCase().split(" ").join("-")
     // Prepare the data for creating a new gallery entry
@@ -147,6 +149,13 @@ export class PostsService {
         data: validCategories,
       });
     }
+
+    const existingPost = await this.prisma.posts.findFirst({
+      where: { id }
+    })
+    if (!img) {
+      img = existingPost.img
+    }
     // Update the gallery with the new data
     const post = await this.prisma.posts.update({
       where: { id },
@@ -154,11 +163,11 @@ export class PostsService {
         title: postData.title,
         slug: postData.slug,
         desc: postData.desc,
-        img: img || null, // Only update the image if a new one is provided
+        img: img,
       },
     });
-    const postDetail = await this.prisma.post_details.update({
-      where: { id },
+    await this.prisma.post_details.updateMany({
+      where: { post_id: id },
       data: {
         content: content,
       },
