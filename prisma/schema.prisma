@@ -115,7 +115,7 @@ model post_details {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  post posts @relation(fields: [post_id], references: [id])
+  post posts @relation(fields: [post_id], references: [id], onDelete: Cascade)
 }
 
 model gallery_categories {

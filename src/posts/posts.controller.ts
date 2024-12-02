@@ -79,8 +79,31 @@ export class PostsController {
   @ApiResponse({ status: 200, description: 'Post successfully updated.' })
   @ApiResponse({ status: 404, description: 'Post not found.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
-  async update(@Param('id') id: string, @Body() updatePostDto: any) {
-    return this.postsService.update(id, updatePostDto);
+  @UseInterceptors(FileInterceptor('img', {
+    storage: diskStorage({
+      destination: './uploads',
+      filename: (req, file, cb) => {
+        const originalName = file.originalname.split('.')[0];
+        const fileExt = path.extname(file.originalname);
+        const newFileName = `${originalName}-${Date.now()}${fileExt}`;
+        cb(null, newFileName);
+      },
+    }),
+  }))
+  async update(
+    @Param('id') id: string,
+    @Body() updatePostDto: any,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    const fileUrl = file ? `/${file.filename}` : null;
+
+    const {img, ...rest} = updatePostDto
+    const updatedGalleryDto = {
+      ...rest,
+      img: fileUrl, // Attach the image URL directly at the root level
+    };
+
+    return this.postsService.update(id, updatedGalleryDto);
   }
 
   @Delete(':id')

@@ -108,10 +108,10 @@ export class PostsService {
   }
 
   async update(id: string, updatePostDto: any) {
-    const { user_id, title, desc, content, img, categories } = updatePostDto;
+    let { user_id, title, desc, content, img, categories } = updatePostDto;
     const slug = title.toLowerCase().split(" ").join("-")
     // Prepare the data for creating a new gallery entry
-    const postData = {
+    let postData = {
       title,
       slug,
       user_id,
@@ -147,7 +147,6 @@ export class PostsService {
         data: validCategories,
       });
     }
-  
     // Update the gallery with the new data
     const post = await this.prisma.posts.update({
       where: { id },
@@ -155,7 +154,7 @@ export class PostsService {
         title: postData.title,
         slug: postData.slug,
         desc: postData.desc,
-        img: img || undefined, // Only update the image if a new one is provided
+        img: img || null, // Only update the image if a new one is provided
       },
     });
     const postDetail = await this.prisma.post_details.update({
@@ -169,10 +168,18 @@ export class PostsService {
   }
 
   async remove(id: string) {
-    await this.findOne(id);
-
-    return this.prisma.posts.delete({
+    // Hapus data terkait di tabel `post_details`
+    await this.prisma.post_details.deleteMany({
+      where: { post_id: id },
+    });
+    await this.prisma.post_category.deleteMany({
+      where: { post_id: id },
+    });
+  
+    // Hapus data di tabel `posts`
+    return await this.prisma.posts.delete({
       where: { id },
     });
   }
+  
 }
