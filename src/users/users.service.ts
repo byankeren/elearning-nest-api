@@ -51,8 +51,12 @@ export class UsersService {
     });
   }
 
-  async update(id: string, data: UpdateUserDto) {
-    await this.findOne(id)
+  async update(id: string, data: any) {
+    const user = await this.findOne(id)
+
+    if(!data.image) {
+      data.image = user.image
+    }
 
     if (data.password) {
       data.password = await bcrypt.hash(data.password, 10);

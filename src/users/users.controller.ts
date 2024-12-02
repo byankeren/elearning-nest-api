@@ -96,10 +96,12 @@ export class UsersController {
     // Construct the file URL if an image was uploaded
     const fileUrl = file ? `/${file.filename}` : null
     // Prepare the final DTO for creating a gallery
+    const {img, ...rest} = updateUserDto
     const updatedUserDto = {
-      ...updateUserDto,
+      ...rest,
       image: fileUrl, // Attach the image URL directly at the root level
     };
+
     return this.usersService.update(id, updatedUserDto);
   }
 
