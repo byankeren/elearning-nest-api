@@ -6,24 +6,23 @@ export async function seedUsers(prisma: PrismaClient) {
   await prisma.users.createMany({
     data: [
         {
-          "name": "Abyan",
+          "name": "Muhamad Abyan Riyadh Amal",
           "email": "user1@example.com",
           "password": password,
           "image": '/img-1733732285436.jpg',
         },
         {
-          "name": "Chico",
+          "name": "Chico Arjuna Nugroho",
           "email": "user2@example.com",
           "password": password,
-          "image": '/img-1733732285436.jpg',
         },
         {
-          "name": "Dewangga",
+          "name": "Dewangga Mustika Dwipayana",
           "email": "user3@example.com",
           "password": password,
         },
         {
-          "name": "Rizki",
+          "name": "Muhamad Rizki Herdiansyah",
           "email": "user4@example.com",
           "password": password,
         },
