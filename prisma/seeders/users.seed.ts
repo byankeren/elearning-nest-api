@@ -9,17 +9,19 @@ export async function seedUsers(prisma: PrismaClient) {
           "name": "Muhamad Abyan Riyadh Amal",
           "email": "user1@example.com",
           "password": password,
-          "image": '/img-1733732285436.jpg',
+          "image": '/abyan.jpg',
         },
         {
           "name": "Chico Arjuna Nugroho",
           "email": "user2@example.com",
           "password": password,
+          "image": '/chico.jpg',
         },
         {
           "name": "Dewangga Mustika Dwipayana",
           "email": "user3@example.com",
           "password": password,
+          "image": '/dedew.jpg',
         },
         {
           "name": "Muhamad Rizki Herdiansyah",
