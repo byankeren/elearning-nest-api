@@ -5,23 +5,23 @@ export async function seedGalleries(prisma: PrismaClient) {
     data: [
         {
           "name": "Abyan",
-          "img": '/img-1733732285436.jpg',
+          "img": '/Screenshot (56)-1733111600177.png',
           "desc" : "lorem",
         },
         {
           "name": "Chico",
           "desc" : "lorem",
-          "img": '/img-1733732285436.jpg',
+          "img": '/Screenshot (55)-1733111600177.png',
         },
         {
           "name": "Dewangga",
           "desc" : "lorem",
-          "img": '/img-1733732285436.jpg',
+          "img": '/Screenshot (54)-1733111600177.png',
         },
         {
           "name": "Rizki",
           "desc" : "lorem",
-          "img": '/img-1733732285436.jpg',
+          "img": '/Screenshot (53)-1733111600177.png',
         },
   ]
   });

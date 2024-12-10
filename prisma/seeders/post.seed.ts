@@ -8,7 +8,7 @@ export async function seedPosts(prisma: PrismaClient) {
 
   const postsData = [
     {
-      img: '/img-1733732285436.jpg',
+      img: '/prisma.png',
       title: 'How to Learn Prisma',
       slug: 'how-to-learn-prisma',
       user_id: users[0].id,
@@ -17,7 +17,7 @@ export async function seedPosts(prisma: PrismaClient) {
       views: 120,
     },
     {
-      img: '/img-1733732285436.jpg',
+      img: '/java.png',
       title: 'Understanding JavaScript Closures',
       slug: 'understanding-javascript-closures',
       user_id: users[1]?.id || users[0].id, 
@@ -26,7 +26,7 @@ export async function seedPosts(prisma: PrismaClient) {
       views: 340,
     },
     {
-      img: '/img-1733732285436.jpg',
+      img: '/coding.jpeg',
       title: '10 Tips for Better Coding',
       slug: '10-tips-for-better-coding',
       user_id: users[2]?.id || users[0].id,
@@ -35,7 +35,7 @@ export async function seedPosts(prisma: PrismaClient) {
       views: 270,
     },
     {
-      img: '/img-1733732285436.jpg',
+      img: '/ts.png',
       title: 'Exploring TypeScript Features',
       slug: 'exploring-typescript-features',
       user_id: users[3]?.id || users[0].id,

@@ -4,14 +4,14 @@ export async function seedCategories(prisma: PrismaClient) {
   await prisma.categories.createMany({
     data: [
         {
-          "title": "Product",
+          "title": "Bussines",
 
         },
         {
-          "title": "Aktifitas", 
+          "title": "Company Profile", 
         },
         {
-          "title": "keseharian",
+          "title": "Olshop",
         },
   ]
   });
