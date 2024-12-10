@@ -5,23 +5,23 @@ export async function seedGalleries(prisma: PrismaClient) {
     data: [
         {
           "name": "T-SHOP",
-          "img": '/Screenshot (51)-1733111600177.png',
+          "img": '/Screenshot-51.png',
           "desc" : "lorem",
         },
         {
           "name": "BIZZBUD",
           "desc" : "lorem",
-          "img": '/Screenshot (52)-1733111600177.png',
+          "img": '/Screenshot-52.png',
         },
         {
           "name": "BACK2SCHOOL",
           "desc" : "lorem",
-          "img": '/Screenshot (54)-1733111600177.png',
+          "img": '/Screenshot-54.png',
         },
         {
           "name": "ZOZO GAMES",
           "desc" : "lorem",
-          "img": '/Screenshot (53)-1733111600177.png',
+          "img": '/Screenshot-53.png',
         },
   ]
   });
