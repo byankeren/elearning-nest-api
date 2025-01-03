@@ -98,6 +98,7 @@ export class PostsService {
         user: true,
         images: true,
         categories: true,
+        post_details: true, 
       },
     });
 
