@@ -8,18 +8,21 @@ import { PostResponseDto } from './dto/post-response.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { posts } from '@prisma/client';
 import * as path from 'path'; // Import path for file handling
-import { AuthGuard } from '@nestjs/passport';
-import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guards';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Permissions } from 'src/auth/decorators/permissions.decorator';
+import { PermissionsGuard } from 'src/auth/guards/permissions.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @ApiTags('Posts')
 @Controller('posts')
-// @UseGuards(AuthGuard('jwt'))
-// @ApiBearerAuth('jwt')
+@UseGuards(RolesGuard, JwtAuthGuard, PermissionsGuard)
+@ApiBearerAuth('jwt')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Post()
+  @Permissions('create-post')
   @ApiOperation({ summary: 'Create a new post' })
   @ApiResponse({ status: 201, description: 'Post successfully created.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
@@ -52,6 +55,7 @@ export class PostsController {
 
 
   @Get()
+  @Permissions('view-post')
   @ApiOperation({ summary: 'Get all posts' })
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({ status: 404, description: 'No posts found.' })
@@ -69,6 +73,7 @@ export class PostsController {
   }
 
   @Get(':id')
+  @Permissions('view-post')
   @ApiOperation({ summary: 'Get a post by ID' })
   @ApiParam({ name: 'id', description: 'Post ID', required: true })
   @ApiResponse({ status: 200, description: 'Success' })
@@ -78,6 +83,7 @@ export class PostsController {
   }
 
   @Patch(':id')
+  @Permissions('update-post')
   @ApiOperation({ summary: 'Update a post by ID' })
   @ApiParam({ name: 'id', description: 'Post ID', required: true })
   @ApiResponse({ status: 200, description: 'Post successfully updated.' })
@@ -125,6 +131,7 @@ export class PostsController {
   }
 
   @Delete(':id')
+  @Permissions('delete-post')
   @ApiOperation({ summary: 'Delete a post by ID' })
   @ApiParam({ name: 'id', description: 'Post ID', required: true })
   @ApiResponse({ status: 204, description: 'Post successfully deleted.' })

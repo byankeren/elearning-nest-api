@@ -16,6 +16,7 @@ import { RolesGuard } from './auth/guards/roles.guards';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 // import { UserRolesModule } from './user_roles/user_roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
+import { RolePermissionsModule } from './role_permissions/role_permissions.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { PermissionsModule } from './permissions/permissions.module';
     ContactUsModule,
     DashboardModule,
     PermissionsModule,
+    RolePermissionsModule,
     // UserRolesModule,
   ],
   controllers: [AppController],

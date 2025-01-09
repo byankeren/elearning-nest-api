@@ -23,6 +23,7 @@ export class ContactUsController {
   }
 
   @Get()
+  @Permissions('view-mailbox')
   @ApiOperation({ summary: 'Get all contact messages' })
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({ status: 404, description: 'No contact messages found.' })
@@ -62,6 +63,7 @@ export class ContactUsController {
   }
 
   @Delete(':id')
+  @Permissions('delete-mailbox')
   @ApiOperation({ summary: 'Delete a contact us record by ID' })
   @ApiParam({ name: 'id', description: 'The ID of the contact us record to delete' })
   remove(@Param('id') id: string) {

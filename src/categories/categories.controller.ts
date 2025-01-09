@@ -19,6 +19,7 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
+  @Permissions('create-categories')
   @ApiOperation({ summary: 'Create a new category' })
   @ApiResponse({ status: 201, description: 'Category successfully created.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
@@ -27,7 +28,7 @@ export class CategoriesController {
   }
 
   @Get()
-  // @Permissions('view-categories]')
+  @Permissions('view-categories]')
   @ApiOperation({ summary: 'Get all categories' })
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({ status: 404, description: 'No categories found.' })
@@ -61,6 +62,7 @@ export class CategoriesController {
   }
 
   @Patch(':id')
+  @Permissions('update-categories')
   @ApiOperation({ summary: 'Update a category by ID' })
   @ApiParam({ name: 'id', description: 'Category ID', required: true })
   @ApiResponse({ status: 200, description: 'Category successfully updated.' })
@@ -71,6 +73,7 @@ export class CategoriesController {
   }
 
   @Delete(':id')
+  @Permissions('delete-categories')
   @ApiOperation({ summary: 'Delete a category by ID' })
   @ApiParam({ name: 'id', description: 'Category ID', required: true })
   @ApiResponse({ status: 204, description: 'Category successfully deleted.' })

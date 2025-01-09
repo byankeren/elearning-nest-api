@@ -16,12 +16,28 @@ export async function seedRolePermissions(prisma: PrismaClient) {
     });
   }
 
-  // Create permissions if they do not exist
+  // Define all permissions for different modules
   const permissions = [
+    // Gallery permissions
     { name: 'Create Gallery', slug: 'create-gallery' },
     { name: 'View Gallery', slug: 'view-gallery' },
     { name: 'Update Gallery', slug: 'update-gallery' },
     { name: 'Delete Gallery', slug: 'delete-gallery' },
+    // Post permissions
+    { name: 'Create Post', slug: 'create-post' },
+    { name: 'View Post', slug: 'view-post' },
+    { name: 'Update Post', slug: 'update-post' },
+    { name: 'Delete Post', slug: 'delete-post' },
+    // Categories permissions
+    { name: 'Create Categories', slug: 'create-categories' },
+    { name: 'View Categories', slug: 'view-categories' },
+    { name: 'Update Categories', slug: 'update-categories' },
+    { name: 'Delete Categories', slug: 'delete-categories' },
+    // Mailbox permissions
+    { name: 'Create Mailbox', slug: 'create-mailbox' },
+    { name: 'View Mailbox', slug: 'view-mailbox' },
+    { name: 'Update Mailbox', slug: 'update-mailbox' },
+    { name: 'Delete Mailbox', slug: 'delete-mailbox' },
   ];
 
   // Create permissions if not already present
@@ -40,30 +56,32 @@ export async function seedRolePermissions(prisma: PrismaClient) {
     }
   }
 
-  // Get the permissions to be linked to admin
-  const createPermission = await prisma.permissions.findFirst({
-    where: { slug: 'create-gallery' },
-  });
-  const viewPermission = await prisma.permissions.findFirst({
-    where: { slug: 'view-gallery' },
-  });
-  const updatePermission = await prisma.permissions.findFirst({
-    where: { slug: 'update-gallery' },
-  });
-  const deletePermission = await prisma.permissions.findFirst({
-    where: { slug: 'delete-gallery' },
+  // Link permissions to admin role
+  const adminRole = await prisma.roles.findFirst({
+    where: { slug: 'admin' },
   });
 
-  // Link permissions to admin role
-  if (admin && createPermission && viewPermission && updatePermission && deletePermission) {
-    await prisma.role_permissions.createMany({
-      data: [
-        { role_id: admin.id, permission_id: createPermission.id },
-        { role_id: admin.id, permission_id: viewPermission.id },
-        { role_id: admin.id, permission_id: updatePermission.id },
-        { role_id: admin.id, permission_id: deletePermission.id },
-      ],
-    });
+  if (adminRole) {
+    for (const perm of permissions) {
+      const permission = await prisma.permissions.findFirst({
+        where: { slug: perm.slug },
+      });
+
+      if (permission) {
+        const existingRolePermission = await prisma.role_permissions.findFirst({
+          where: { role_id: adminRole.id, permission_id: permission.id },
+        });
+
+        if (!existingRolePermission) {
+          await prisma.role_permissions.create({
+            data: {
+              role_id: adminRole.id,
+              permission_id: permission.id,
+            },
+          });
+        }
+      }
+    }
   }
 
   console.log('Admin role and permissions seeded successfully!');
