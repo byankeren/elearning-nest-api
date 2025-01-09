@@ -4,6 +4,7 @@ import { seedCategories } from './seeders/categories.seed';
 import { seedGalleryCategories } from './seeders/gallery-category.seed';
 import { seedRoles } from './seeders/roles.seed';
 import { seedPosts } from './seeders/post.seed';
+import { seedRolePermissions } from './seeders/role-permissions';
 const prisma = new PrismaClient();
 
 async function main() {
@@ -11,6 +12,7 @@ async function main() {
   await seedUsers(prisma);
   await seedCategories(prisma);
   await seedPosts(prisma);
+  await seedRolePermissions(prisma)
 }
 
 main()

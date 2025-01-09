@@ -23,16 +23,17 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { galleries } from '@prisma/client';
-import { Roles } from 'src/auth/decorators/roles.decorator';
 import { UseGuards } from '@nestjs/common';
 import * as path from 'path'; // Import path for file handling
 import { RolesGuard } from 'src/auth/guards/roles.guards';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { Permissions } from 'src/auth/decorators/permissions.decorator';
+import { PermissionsGuard } from 'src/auth/guards/permissions.guard';
 @ApiTags('Gallery')
 @Controller('gallery')
-@UseGuards(RolesGuard, JwtAuthGuard) // Uncomment if using JWT authentication
-@ApiBearerAuth('jwt') // Uncomment if using JWT authentication
+@UseGuards(RolesGuard, JwtAuthGuard, PermissionsGuard)
+@ApiBearerAuth('jwt')
 export class GalleryController {
   constructor(private readonly galleryService: GalleryService) {}
 
@@ -70,7 +71,7 @@ export class GalleryController {
   }
 
   @Get()
-  @Roles('super-admin')
+  @Permissions('view-gallery')
   @ApiOperation({ summary: 'Get all galleries' })
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({ status: 404, description: 'No galleries found.' })
@@ -96,7 +97,6 @@ export class GalleryController {
     @Query('limit') limit?: string,
     @Query('page') page?: string,
     @Query('category_id') category_id?: string,
-    // ): Promise<{ data: galleries[]; meta: { total: number; page: number; limit: number; total_pages: number } }> {
   ) {
     const limitNumber = parseInt(limit) || 10;
     const pageNumber = parseInt(page) || 1;

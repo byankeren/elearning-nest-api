@@ -41,21 +41,33 @@ model roles {
 
   users     users[]
   user_roles user_roles[]
+  permissions role_permissions[]
 }
 
-model user_roles {
+model role_permissions {
   id       String @id @unique @default(uuid())
-  user_id  String
-  roles_id String
+  role_id     String
+  permission_id String
+
 
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
   deleted_at DateTime?
 
-  user users @relation(fields: [user_id], references: [id])
-  role roles @relation(fields: [roles_id], references: [id])
+  role       roles       @relation(fields: [role_id], references: [id])
+  permission permissions @relation(fields: [permission_id], references: [id])
+}
 
-  @@unique([user_id, roles_id])
+model permissions {
+  id    String @id @default(uuid())
+  name  String
+  slug  String
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  roles role_permissions[]
 }
 
 model galleries {
@@ -72,6 +84,20 @@ model galleries {
   categories gallery_categories[]
 }
 
+model user_roles {
+  id       String @id @unique @default(uuid())
+  user_id  String
+  roles_id String
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  user users @relation(fields: [user_id], references: [id])
+  role roles @relation(fields: [roles_id], references: [id])
+
+  @@unique([user_id, roles_id])
+}
 model categories {
   id    String @id @unique @default(uuid())
   title String
