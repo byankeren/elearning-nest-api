@@ -158,3 +158,4 @@ model contact_us {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+

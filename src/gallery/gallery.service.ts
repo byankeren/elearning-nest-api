@@ -69,7 +69,10 @@ export class GalleryService {
         where,
         skip: skip,
         take: limit,
-        include: {categories: true}
+        include: {
+          categories: true,
+          user: true, 
+        }
       }),
       this.prisma.galleries.count({where}),
     ]);

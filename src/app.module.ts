@@ -11,6 +11,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { ContactUsModule } from './contact-us/contact-us.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { UserRolesModule } from './user_roles/user_roles.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     }),
     ContactUsModule,
     DashboardModule,
+    UserRolesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
