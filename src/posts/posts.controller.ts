@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, UploadedFile, UseInterceptors, Req } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express'; // Import diskStorage from multer
 import { diskStorage } from 'multer';
 import { PostsService } from './posts.service';
@@ -9,6 +9,8 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth }
 import { posts } from '@prisma/client';
 import * as path from 'path'; // Import path for file handling
 import { AuthGuard } from '@nestjs/passport';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { RolesGuard } from 'src/auth/guards/roles.guards';
 
 @ApiTags('Posts')
 @Controller('posts')
@@ -55,10 +57,13 @@ export class PostsController {
   @ApiResponse({ status: 404, description: 'No posts found.' })
   @ApiQuery({ name: 'limit', required: false, description: 'Number of posts to return per page', example: 10 })
   @ApiQuery({ name: 'page', required: false, description: 'Page number to retrieve', example: 1 })
+  @Roles('super-admin', 'admin')
   async findAll(
+    @Req() req,
     @Query('limit') limit?: string,
-    @Query('page') page?: string
+    @Query('page') page?: string,
   ): Promise<PostResponseDto> {
+    console.log('Logged-in user:', req.user); // Log the user
     const limitNumber = parseInt(limit) || 10;
     const pageNumber = parseInt(page) || 1;
     return this.postsService.findAll(limitNumber, pageNumber);

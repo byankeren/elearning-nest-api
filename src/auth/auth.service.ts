@@ -23,14 +23,14 @@ export class AuthService {
   // Login logic: Validate user and return JWT
   async login(email: string, password: string) {
     const user = await this.validateUser(email, password);
-    
+    console.log(user)
     // If user validation failed
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
     // Create the payload for JWT
-    const payload = { email: user.email, sub: user.id };
+    const payload = { email: user.email, sub: user.id, role: user.role.slug };
     
     // Generate JWT and return it with the user details
     return {

@@ -11,7 +11,10 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { ContactUsModule } from './contact-us/contact-us.module';
 import { DashboardModule } from './dashboard/dashboard.module';
-import { UserRolesModule } from './user_roles/user_roles.module';
+import { APP_GUARD } from '@nestjs/core';
+import { RolesGuard } from './auth/guards/roles.guards';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+// import { UserRolesModule } from './user_roles/user_roles.module';
 
 @Module({
   imports: [
@@ -26,9 +29,18 @@ import { UserRolesModule } from './user_roles/user_roles.module';
     }),
     ContactUsModule,
     DashboardModule,
-    UserRolesModule,
+    // UserRolesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard, // Global JWT authentication
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard, // Global role-based authorization
+    },
+  ],
 })
 export class AppModule {}

@@ -17,11 +17,13 @@ model users {
   instagram_link String?
   twitter_link   String?
   linkedin_link  String?
+  role_id        String?
 
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
   deleted_at DateTime?
 
+  role  roles? @relation(fields: [role_id], references: [id])
   roles user_roles[]
 
   posts     posts[]
@@ -37,7 +39,8 @@ model roles {
   updated_at DateTime  @updatedAt
   deleted_at DateTime?
 
-  users user_roles[]
+  users     users[]
+  user_roles user_roles[]
 }
 
 model user_roles {

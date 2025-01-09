@@ -7,7 +7,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { SwaggerCustomOptions } from '@nestjs/swagger/dist/interfaces/swagger-custom-options.interface';
 import { ValidationPipe } from '@nestjs/common'; // Import ValidationPipe
-
+import { LoggingMiddleware } from './auth/middleware/logging.middleware';
 interface User {
   id: string; // or your appropriate type
 }
@@ -35,6 +35,9 @@ async function bootstrap() {
       cookie: { maxAge: 86400000 }, // 1 day
     }),
   );
+
+  // Apply middleware globally
+  app.use(new LoggingMiddleware().use);
 
   // Initialize passport and session
   app.use(passport.initialize());
