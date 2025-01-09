@@ -16,4 +16,11 @@ export class DashboardController {
   async getDashboardCounts() {
     return await this.dashboardService.getDashboardCounts();
   }
+  
+  @Get('monthly-data')
+  async getMonthlyData() {
+    return this.dashboardService.monthlyData();
+  }
+  
+
 }

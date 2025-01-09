@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsOptional, ValidateNested, IsArray } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, ValidateNested, IsArray, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -24,6 +24,12 @@ class GalleryData {
   @IsOptional()
   @IsString()
   img?: string;
+
+  @ApiProperty({ description: 'The user ID associated with the post', example: '22a80b4f-a0b5-4547-9202-fe0b3770dbce' })
+  @IsNotEmpty()
+  @IsUUID()
+  user_id: string;
+
 }
 
 export class CreateGalleryDto {

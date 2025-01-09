@@ -8,14 +8,14 @@ datasource db {
 }
 
 model users {
-  id       String  @id @unique @default(uuid())
-  name     String
-  email    String  @unique
-  password String
-  image    String?
+  id             String  @id @unique @default(uuid())
+  name           String
+  email          String  @unique
+  password       String
+  image          String?
   facebook_link  String?
-  instagram_link  String?
-  twitter_link  String?
+  instagram_link String?
+  twitter_link   String?
   linkedin_link  String?
 
   created_at DateTime  @default(now())
@@ -24,7 +24,8 @@ model users {
 
   roles user_roles[]
 
-  posts posts[]
+  posts     posts[]
+  galleries galleries[]
 }
 
 model roles {
@@ -55,14 +56,16 @@ model user_roles {
 }
 
 model galleries {
-  id   String  @id @unique @default(uuid())
-  name String
-  desc String
-  img  String?
+  id      String  @id @unique @default(uuid())
+  name    String
+  desc    String
+  img     String?
+  user_id String
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
+  user       users                @relation(fields: [user_id], references: [id])
   categories gallery_categories[]
 }
 
