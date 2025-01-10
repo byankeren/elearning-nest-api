@@ -1,12 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete,Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete,Query ,UseGuards} from '@nestjs/common';
 import { ContactUsService } from './contact-us.service';
 import { CreateContactUsDto } from './dto/create-contact-us.dto';
 import { UpdateContactUsDto } from './dto/update-contact-us.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery ,ApiBearerAuth} from '@nestjs/swagger';
 import { ContactUsResponseDto } from './dto/contactus-response.dto';
+import { RolesGuard } from 'src/auth/guards/roles.guards';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Permissions } from 'src/auth/decorators/permissions.decorator';
+import { PermissionsGuard } from 'src/auth/guards/permissions.guard';
 
 @Controller('contact-us')
 @ApiTags('Contact Us')
+@UseGuards(RolesGuard, JwtAuthGuard, PermissionsGuard)
+@ApiBearerAuth('jwt')
 export class ContactUsController {
   constructor(private readonly contactUsService: ContactUsService) {}
 

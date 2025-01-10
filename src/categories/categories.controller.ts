@@ -1,16 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 // import { CategoryResponseDto } from './dto/category-response.dto';
 import { CategoryResponseDto } from './dto/category-response.dto'; 
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { categories } from '@prisma/client'; 
+import { RolesGuard } from 'src/auth/guards/roles.guards';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Permissions } from 'src/auth/decorators/permissions.decorator';
+import { PermissionsGuard } from 'src/auth/guards/permissions.guard';
 
 @ApiTags('Categories')
 @Controller('categories')
-// @UseGuards(AuthGuard('jwt'))
-// @ApiBearerAuth('jwt')
+@UseGuards(RolesGuard, JwtAuthGuard, PermissionsGuard)
+@ApiBearerAuth('jwt')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
@@ -23,6 +27,7 @@ export class CategoriesController {
   }
 
   @Get()
+  // @Permissions('view-categories]')
   @ApiOperation({ summary: 'Get all categories' })
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({ status: 404, description: 'No categories found.' })
