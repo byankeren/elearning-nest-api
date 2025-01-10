@@ -1,13 +1,17 @@
-import { Controller, Get } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { Controller, Get ,UseGuards} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { DashboardService } from './dashboard.service';
 import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'src/auth/guards/roles.guards';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Permissions } from 'src/auth/decorators/permissions.decorator';
+import { PermissionsGuard } from 'src/auth/guards/permissions.guard';
 
 
 @ApiTags('Dashboard')
 @Controller('dashboard')
-// @UseGuards(AuthGuard('jwt')) // Uncomment if using JWT authentication
-// @ApiBearerAuth('jwt') // Uncomment if using JWT authentication
+@UseGuards(RolesGuard, JwtAuthGuard, PermissionsGuard)
+@ApiBearerAuth('jwt')
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 

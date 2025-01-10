@@ -8,12 +8,16 @@ import { users } from '@prisma/client';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express'; // Import diskStorage from multer
 import { diskStorage } from 'multer';
+import { RolesGuard } from 'src/auth/guards/roles.guards';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Permissions } from 'src/auth/decorators/permissions.decorator';
+import { PermissionsGuard } from 'src/auth/guards/permissions.guard';
 import * as path from 'path'; // Import path for file handling
 
 @ApiTags('Users')
 @Controller('users')
-// @UseGuards(AuthGuard('jwt'))
-// @ApiBearerAuth('jwt')
+@UseGuards(RolesGuard, JwtAuthGuard, PermissionsGuard)
+@ApiBearerAuth('jwt')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -48,6 +52,7 @@ export class UsersController {
   }
 
   @Get()
+  @Permissions('view-users')
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Success' })
   @ApiResponse({ status: 404, description: 'No users found.' })
