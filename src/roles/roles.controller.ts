@@ -4,6 +4,7 @@ import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { roles } from '@prisma/client';
+import { permission } from 'process';
 
 @ApiTags('Roles')
 @Controller('roles')
@@ -59,5 +60,13 @@ export class RolesController {
   @ApiParam({ name: 'id', description: 'The ID of the role to delete' })
   remove(@Param('id') id: string): Promise<roles> {
     return this.rolesService.remove(id);
+  }
+
+  @Post('add-permission/:id')
+  @ApiOperation({ summary: 'Create a new role' })
+  @ApiResponse({ status: 201, description: 'The role has been successfully created.' })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  addPermission(@Param('id') id: string, @Body() createRoleDto: any){
+    return this.rolesService.addPermission(id, createRoleDto);
   }
 }

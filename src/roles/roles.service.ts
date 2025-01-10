@@ -23,6 +23,7 @@ export class RolesService {
       this.prisma.roles.findMany({
         skip: skip,
         take: limit,
+        include: {permissions: true}
       }),
       this.prisma.roles.count()
     ])
@@ -67,4 +68,46 @@ export class RolesService {
       where: { id },
     });
   }
+
+  async addPermission(roleId: string, data: any) {
+    console.log("Deleting existing permissions for role ID:", roleId);
+  
+    try {
+      // Delete existing permissions for the role
+      await this.prisma.role_permissions.deleteMany({
+        where: { role_id: roleId },
+      });
+  
+      // Handle nested or flat structure in `data`
+      let newPermissions = [];
+  
+      // Check if the frontend sends nested `permissions.roles` or a flat array
+      if (data.permissions?.roles) {
+        newPermissions = data.permissions.roles.map((permissionId: string) => ({
+          role_id: roleId,
+          permission_id: permissionId,
+        }));
+      } else if (Array.isArray(data.permissions)) {
+        newPermissions = data.permissions.map((permission: { permission_id: string }) => ({
+          role_id: roleId,
+          permission_id: permission.permission_id,
+        }));
+      } else {
+        throw new Error("Invalid permissions format received");
+      }
+  
+      console.log("Adding new permissions:", newPermissions);
+  
+      // Add the new permissions to the database
+      await this.prisma.role_permissions.createMany({
+        data: newPermissions,
+      });
+  
+      console.log("Permissions updated successfully");
+    } catch (error) {
+      console.error("Error updating permissions:", error);
+      throw new Error("Failed to update permissions");
+    }
+  }
+  
 }
