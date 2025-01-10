@@ -11,8 +11,8 @@ import { PermissionsGuard } from 'src/auth/guards/permissions.guard';
 
 @Controller('contact-us')
 @ApiTags('Contact Us')
-@UseGuards(RolesGuard, JwtAuthGuard, PermissionsGuard)
-@ApiBearerAuth('jwt')
+// @UseGuards(RolesGuard, JwtAuthGuard, PermissionsGuard)
+// @ApiBearerAuth('jwt')
 export class ContactUsController {
   constructor(private readonly contactUsService: ContactUsService) {}
 

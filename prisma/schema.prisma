@@ -24,11 +24,21 @@ model users {
   updated_at DateTime  @updatedAt
   deleted_at DateTime?
 
-  role  roles? @relation(fields: [role_id], references: [id])
+  role  roles?       @relation(fields: [role_id], references: [id])
   roles user_roles[]
 
   posts     posts[]
   galleries galleries[]
+  comments  user_comments[]
+}
+
+model user_comments {
+  id         String   @id @unique @default(uuid())
+  user_id    String
+  content    String
+  created_at DateTime @default(now())
+
+  user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model roles {
@@ -40,16 +50,15 @@ model roles {
   updated_at DateTime  @updatedAt
   deleted_at DateTime?
 
-  users     users[]
-  user_roles user_roles[]
+  users       users[]
+  user_roles  user_roles[]
   permissions role_permissions[]
 }
 
 model role_permissions {
-  id       String @id @unique @default(uuid())
-  role_id     String
+  id            String @id @unique @default(uuid())
+  role_id       String
   permission_id String
-
 
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
@@ -60,9 +69,9 @@ model role_permissions {
 }
 
 model permissions {
-  id    String @id @default(uuid())
-  name  String
-  slug  String
+  id   String @id @default(uuid())
+  name String
+  slug String
 
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
@@ -77,13 +86,23 @@ model galleries {
   desc    String
   img     String?
   user_id String
-  likes   Int? @default(0)
+  likes   Int?    @default(0)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   user       users                @relation(fields: [user_id], references: [id])
   categories gallery_categories[]
+  comments   comments[]
+}
+
+model comments {
+  id         String   @id @unique @default(uuid())
+  gallery_id String
+  content    String
+  created_at DateTime @default(now())
+
+  gallery galleries @relation(fields: [gallery_id], references: [id])
 }
 
 model user_roles {
@@ -100,6 +119,7 @@ model user_roles {
 
   @@unique([user_id, roles_id])
 }
+
 model categories {
   id    String @id @unique @default(uuid())
   title String
@@ -135,10 +155,11 @@ model posts {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  user         users           @relation(fields: [user_id], references: [id])
+  user         users            @relation(fields: [user_id], references: [id])
   images       images[]
   categories   post_category[]
   post_details post_details[]
+  comments     comments_posts[]
 }
 
 model post_details {
@@ -150,6 +171,15 @@ model post_details {
   updated_at DateTime @updatedAt
 
   post posts @relation(fields: [post_id], references: [id], onDelete: Cascade)
+}
+
+model comments_posts {
+  id         String   @id @unique @default(uuid())
+  post_id    String
+  content    String
+  created_at DateTime @default(now())
+
+  post posts @relation(fields: [post_id], references: [id])
 }
 
 model gallery_categories {
@@ -189,4 +219,3 @@ model contact_us {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-

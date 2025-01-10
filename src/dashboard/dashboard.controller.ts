@@ -10,8 +10,8 @@ import { PermissionsGuard } from 'src/auth/guards/permissions.guard';
 
 @ApiTags('Dashboard')
 @Controller('dashboard')
-@UseGuards(RolesGuard, JwtAuthGuard, PermissionsGuard)
-@ApiBearerAuth('jwt')
+// @UseGuards(RolesGuard, JwtAuthGuard, PermissionsGuard)
+// @ApiBearerAuth('jwt')
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 

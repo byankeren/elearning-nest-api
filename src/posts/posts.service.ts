@@ -217,5 +217,33 @@ export class PostsService {
       where: { id },
     });
   }
+
+  async addComment(postId: string, content: string) {
+    return await this.prisma.comments_posts.create({
+      data: {
+        post_id: postId,
+        content,
+      },
+    });
+  }
   
+  async getComments(postId: string) {
+    return await this.prisma.comments_posts.findMany({
+      where: { post_id: postId },
+      orderBy: { created_at: 'desc' },
+    });
+  }
+  
+  async updateComment(commentId: string, content: string) {
+    return await this.prisma.comments_posts.update({
+      where: { id: commentId },
+      data: { content },
+    });
+  }
+  
+  async deleteComment(commentId: string) {
+    return await this.prisma.comments_posts.delete({
+      where: { id: commentId },
+    });
+  }  
 }

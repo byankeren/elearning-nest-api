@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
+  [x: string]: any;
   constructor(private prisma: PrismaService) {}
 
   async create(data: any) {
@@ -112,5 +113,51 @@ export class UsersService {
     }
 
     return post;
+  }
+
+  async addComment(userId: string, content: string) {
+    const user = await this.prisma.users.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    return this.prisma.user_comments.create({
+      data: {
+        user_id: userId,
+        content,
+      },
+    });
+  }
+
+  async getComments(userId: string) {
+    const user = await this.prisma.users.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    return this.prisma.user_comments.findMany({
+      where: { user_id: userId },
+      orderBy: { created_at: 'desc' },
+    });
+  }
+
+  async deleteComment(commentId: string) {
+    const comment = await this.prisma.user_comments.findUnique({
+      where: { id: commentId },
+    });
+
+    if (!comment) {
+      throw new NotFoundException(`Comment with ID ${commentId} not found`);
+    }
+
+    return this.prisma.user_comments.delete({
+      where: { id: commentId },
+    });
   }
 }

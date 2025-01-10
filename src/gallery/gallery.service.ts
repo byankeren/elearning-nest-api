@@ -187,5 +187,39 @@ export class GalleryService {
 
     return post;
   }
-
+  async addComment(gallery_id: string, content: string) {
+    await this.findOne(gallery_id); // Pastikan galeri ada
+  
+    const comment = await this.prisma.comments.create({
+      data: {
+        gallery_id,
+        content,
+      },
+    });
+  
+    return comment;
+  }
+  
+  async getComments(gallery_id: string) {
+    return this.prisma.comments.findMany({
+      where: { gallery_id },
+      orderBy: { created_at: 'desc' },
+    });
+  }
+  
+  async deleteComment(galleryId: string, commentId: string) {
+    // Periksa apakah komentar ada dan terkait dengan galeri yang benar
+    const comment = await this.prisma.comments.findUnique({
+      where: { id: commentId },
+    });
+  
+    if (!comment || comment.gallery_id !== galleryId) {
+      throw new NotFoundException('Comment not found or does not belong to this gallery');
+    }
+  
+    // Hapus komentar
+    await this.prisma.comments.delete({
+      where: { id: commentId },
+    });
+  }  
 }

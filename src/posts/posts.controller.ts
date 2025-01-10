@@ -16,8 +16,8 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @ApiTags('Posts')
 @Controller('posts')
-@UseGuards(RolesGuard, JwtAuthGuard, PermissionsGuard)
-@ApiBearerAuth('jwt')
+// @UseGuards(RolesGuard, JwtAuthGuard, PermissionsGuard)
+// @ApiBearerAuth('jwt')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
@@ -138,5 +138,26 @@ export class PostsController {
   @ApiResponse({ status: 404, description: 'Post not found.' })
   async remove(@Param('id') id: string) {
     return this.postsService.remove(id);
+  }
+
+  @Post(':id/comments')
+  @ApiOperation({ summary: 'Add a comment to a post' })
+  @ApiResponse({ status: 201, description: 'Comment added successfully.' })
+  async addComment(@Param('id') postId: string, @Body('content') content: string) {
+    return this.postsService.addComment(postId, content);
+  }
+
+  @Get(':id/comments')
+  @ApiOperation({ summary: 'Get comments for a post' })
+  @ApiResponse({ status: 200, description: 'Comments retrieved successfully.' })
+  async getComments(@Param('id') postId: string) {
+    return this.postsService.getComments(postId);
+  }
+
+  @Delete('comments/:id')
+  @ApiOperation({ summary: 'Delete a comment' })
+  @ApiResponse({ status: 204, description: 'Comment deleted successfully.' })
+  async deleteComment(@Param('id') commentId: string) {
+    return this.postsService.deleteComment(commentId);
   }
 }

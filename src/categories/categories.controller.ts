@@ -13,8 +13,8 @@ import { PermissionsGuard } from 'src/auth/guards/permissions.guard';
 
 @ApiTags('Categories')
 @Controller('categories')
-@UseGuards(RolesGuard, JwtAuthGuard, PermissionsGuard)
-@ApiBearerAuth('jwt')
+// @UseGuards(RolesGuard, JwtAuthGuard, PermissionsGuard)
+// @ApiBearerAuth('jwt')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 

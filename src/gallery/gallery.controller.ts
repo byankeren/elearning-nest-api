@@ -11,7 +11,8 @@ import {
   UseInterceptors,
   NotFoundException,
   Req,
-  Put
+  Put,
+  BadRequestException
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express'; // Import diskStorage from multer
 import { diskStorage } from 'multer';
@@ -176,5 +177,39 @@ export class GalleryController {
   @ApiResponse({ status: 404, description: 'Gallery not found.' })
   async remove(@Param('id') id: string): Promise<galleries> {
     return this.galleryService.remove(id);
+  }
+  @Post(':id/comments')
+  @ApiOperation({ summary: 'Add a comment to a gallery' })
+  @ApiParam({ name: 'id', description: 'Gallery ID', required: true })
+  async addComment(
+    @Param('id') id: string,
+    @Body('content') content: string,
+  ) {
+    if (!content || content.trim() === '') {
+      throw new BadRequestException('Content cannot be empty');
+    }
+
+    return this.galleryService.addComment(id, content);
+  }
+
+  @Get(':id/comments')
+  @ApiOperation({ summary: 'Get comments for a gallery' })
+  @ApiParam({ name: 'id', description: 'Gallery ID', required: true })
+  async getComments(@Param('id') id: string) {
+    return this.galleryService.getComments(id);
+  }
+
+  @Delete(':galleryId/comments/:commentId')
+  @ApiOperation({ summary: 'Delete a comment from a gallery' })
+  @ApiParam({ name: 'galleryId', description: 'Gallery ID', required: true })
+  @ApiParam({ name: 'commentId', description: 'Comment ID', required: true })
+  @ApiResponse({ status: 200, description: 'Comment successfully deleted.' })
+  @ApiResponse({ status: 404, description: 'Comment not found.' })
+  async deleteComment(
+    @Param('galleryId') galleryId: string,
+    @Param('commentId') commentId: string,
+  ) {
+    await this.galleryService.deleteComment(galleryId, commentId);
+    return { message: 'Comment deleted successfully.' };
   }
 }
