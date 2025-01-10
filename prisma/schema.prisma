@@ -18,6 +18,7 @@ model users {
   twitter_link   String?
   linkedin_link  String?
   role_id        String?
+  likes          Int?
 
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
@@ -76,6 +77,7 @@ model galleries {
   desc    String
   img     String?
   user_id String
+  likes   Int? @default(0)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -128,7 +130,7 @@ model posts {
   user_id   String
   desc      String
   read_time Int?
-  views     Int?
+  likes     Int?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

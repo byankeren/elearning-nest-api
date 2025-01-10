@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, UploadedFile, UseInterceptors, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, UploadedFile, UseInterceptors, Req, Put } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express'; // Import diskStorage from multer
 import { diskStorage } from 'multer';
 import { PostsService } from './posts.service';
@@ -63,7 +63,6 @@ export class PostsController {
     @Query('limit') limit?: string,
     @Query('page') page?: string,
   ): Promise<PostResponseDto> {
-    console.log('Logged-in user:', req.user); // Log the user
     const limitNumber = parseInt(limit) || 10;
     const pageNumber = parseInt(page) || 1;
     return this.postsService.findAll(limitNumber, pageNumber);
@@ -109,6 +108,20 @@ export class PostsController {
     };
 
     return this.postsService.update(id, updatedGalleryDto);
+  }
+
+  @Put('like/:id')
+  async like(
+    @Param('id') id: string,
+  ) {
+    return this.postsService.like(id);
+  }
+
+  @Put('dislike/:id')
+  async dislike(
+    @Param('id') id: string,
+  ) {
+    return this.postsService.dislike(id);
   }
 
   @Delete(':id')

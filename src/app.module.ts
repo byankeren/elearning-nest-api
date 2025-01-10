@@ -15,6 +15,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './auth/guards/roles.guards';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 // import { UserRolesModule } from './user_roles/user_roles.module';
+import { PermissionsModule } from './permissions/permissions.module';
 
 @Module({
   imports: [
@@ -29,18 +30,19 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     }),
     ContactUsModule,
     DashboardModule,
+    PermissionsModule,
     // UserRolesModule,
   ],
   controllers: [AppController],
   providers: [AppService,
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard, // Global JWT authentication
-    },
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard, // Global role-based authorization
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: JwtAuthGuard, // Global JWT authentication
+    // },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: RolesGuard, // Global role-based authorization
+    // },
   ],
 })
 export class AppModule {}

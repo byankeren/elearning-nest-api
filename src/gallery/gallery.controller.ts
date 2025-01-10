@@ -11,6 +11,7 @@ import {
   UseInterceptors,
   NotFoundException,
   Req,
+  Put
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express'; // Import diskStorage from multer
 import { diskStorage } from 'multer';
@@ -32,8 +33,8 @@ import { Permissions } from 'src/auth/decorators/permissions.decorator';
 import { PermissionsGuard } from 'src/auth/guards/permissions.guard';
 @ApiTags('Gallery')
 @Controller('gallery')
-@UseGuards(RolesGuard, JwtAuthGuard, PermissionsGuard)
-@ApiBearerAuth('jwt')
+// @UseGuards(RolesGuard, JwtAuthGuard, PermissionsGuard)
+// @ApiBearerAuth('jwt')
 export class GalleryController {
   constructor(private readonly galleryService: GalleryService) {}
 
@@ -110,6 +111,20 @@ export class GalleryController {
   @ApiResponse({ status: 404, description: 'Gallery not found.' })
   async findOne(@Param('id') id: string): Promise<galleries | null> {
     return this.galleryService.findOne(id);
+  }
+
+  @Put('like/:id')
+  async like(
+    @Param('id') id: string,
+  ) {
+    return this.galleryService.like(id);
+  }
+
+  @Put('dislike/:id')
+  async dislike(
+    @Param('id') id: string,
+  ) {
+    return this.galleryService.dislike(id);
   }
 
   @Patch(':id')

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Put,  UploadedFile, UseInterceptors, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -54,9 +54,11 @@ export class UsersController {
   @ApiQuery({ name: 'limit', required: false, description: 'Number of users to return per page', example: 10 })
   @ApiQuery({ name: 'page', required: false, description: 'Page number to retrieve', example: 1 })
   async findAll(
+    @Req() req,
     @Query('limit') limit?: string,
     @Query('page') page?: string
   ): Promise<UserResponseDto> {
+    // const user = JSON.parse(req.headers['user'])
     const limitNumber = parseInt(limit) || 10;
     const pageNumber = parseInt(page) || 1;
     return this.usersService.findAll(limitNumber, pageNumber);
@@ -112,5 +114,14 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'User not found.' })
   async remove(@Param('id') id: string): Promise<users> {
     return this.usersService.remove(id);
+  }
+
+  @Put('like/:id')
+  async like(@Param('id') id: string) {
+    return this.usersService.like(id);
+  }
+  @Put('dislike/:id')
+  async dislike(@Param('id') id: string) {
+    return this.usersService.dislike(id);
   }
 }

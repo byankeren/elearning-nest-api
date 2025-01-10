@@ -14,13 +14,21 @@ export class UsersService {
   }
 
   async findAll(limit: number = 10, page: number = 1) {
+    // console.log(user)
+    // let whereCondition;
+    // if (user.role == 'admin') {
+    //   whereCondition = { id: user.id }
+    // }
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
       this.prisma.users.findMany({
         skip: skip,
         take: limit,
+        // where: whereCondition
       }),
-      this.prisma.users.count()
+      this.prisma.users.count({
+        // where: whereCondition
+      })
     ])
     return {
       data,
@@ -77,5 +85,32 @@ export class UsersService {
     return this.prisma.users.delete({
       where: { id }
     });
+  }
+
+  async like(id: string) {
+    const post = await this.prisma.users.findUnique({
+      where: { id },
+    });
+
+    await this.prisma.users.update({
+      where: {id},
+      data: {likes: post.likes + 1}
+    })
+
+    return post;
+  }
+
+  async dislike(id: string) {
+    const post = await this.prisma.users.findUnique({
+      where: { id },
+    });
+    if (post.likes > 0) {
+      await this.prisma.users.update({
+        where: {id},
+        data: {likes: post.likes - 1}
+      })
+    }
+
+    return post;
   }
 }

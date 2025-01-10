@@ -19,8 +19,6 @@ export class PostsService {
       img, // Image URL from the file upload
     };
 
-    console.log(user_id)
-
     try {
       // Save the main gallery entry
       const post = await this.prisma.posts.create({
@@ -174,6 +172,34 @@ export class PostsService {
       },
     });
   
+    return post;
+  }
+
+  async like(id: string) {
+    const post = await this.prisma.posts.findUnique({
+      where: { id },
+    });
+
+    await this.prisma.posts.update({
+      where: {id},
+      data: {likes: post.likes + 1}
+    })
+
+    return post;
+  }
+
+  async dislike(id: string) {
+    const post = await this.prisma.posts.findUnique({
+      where: { id },
+    });
+
+    if (post.likes > 0) {
+      await this.prisma.posts.update({
+        where: {id},
+        data: {likes: post.likes - 1}
+      })
+    }
+
     return post;
   }
 

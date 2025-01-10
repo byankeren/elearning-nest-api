@@ -158,4 +158,34 @@ export class GalleryService {
       where: { id },
     });
   }
+
+  async like(id: string) {
+    console.log(id)
+    const post = await this.prisma.galleries.findUnique({
+      where: { id },
+    });
+
+    await this.prisma.galleries.update({
+      where: {id},
+      data: {likes: post.likes + 1}
+    })
+
+    return post;
+  }
+
+  async dislike(id: string) {
+    const post = await this.prisma.galleries.findUnique({
+      where: { id },
+    });
+
+    if (post.likes > 0) {
+      await this.prisma.galleries.update({
+        where: {id},
+        data: {likes: post.likes - 1}
+      })
+    }
+
+    return post;
+  }
+
 }

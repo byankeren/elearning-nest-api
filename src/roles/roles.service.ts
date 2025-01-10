@@ -10,7 +10,7 @@ export class RolesService {
   async create(data: CreateRoleDto) {
     const role = await this.prisma.roles.create({
       data: {
-        slug: data.name.toLocaleLowerCase(),
+        slug: data.name.toLocaleLowerCase().split(' ').join('-'),
         ...data
       },
     });
@@ -49,10 +49,14 @@ export class RolesService {
 
   async update(id: string, data: UpdateRoleDto) {
     await this.findOne(id)
+    
 
     return await this.prisma.roles.update({
       where: { id },
-      data,
+      data: {
+        slug: data.name.toLocaleLowerCase().split(' ').join('-'),
+        ...data
+      },
     });
   }
 
