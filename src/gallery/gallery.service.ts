@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateGalleryDto } from './dto/create-gallery.dto';
 import { UpdateGalleryDto } from './dto/update-gallery.dto';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class GalleryService {
@@ -52,9 +54,6 @@ export class GalleryService {
     }
   }
   
-  
-  
-
   async findAll(limit: number = 10, page: number = 1, category_id: string) {
     const skip = (page - 1) * limit;
     const where = {...(category_id ? {
@@ -100,64 +99,65 @@ export class GalleryService {
     return gallery;
   }
 
-  async update(id: string, updateGalleryDto: any) {
-    const { img, categories, ...otherData } = updateGalleryDto;
-  
-    // Log the other data to debug
-    console.log(otherData);
-  
-    // Delete existing gallery-category relations
-    await this.prisma.gallery_categories.deleteMany({
-      where: {
-        gallery_id: id,
-      },
+  async remove(id: string): Promise<void> {
+    const gallery = await this.prisma.galleries.findUnique({
+      where: { id },
     });
   
-    // If categories are provided, create new gallery-category relations
-    if (categories && Array.isArray(categories)) {
-      // Map over the categories and prepare the data
-      const categoryConnections = categories.map((category) => {
-        // Parse category string if necessary
-        const parsedCategory = typeof category === 'string' ? JSON.parse(category) : category;
+    if (!gallery) {
+      throw new NotFoundException('Gallery not found');
+    }
   
-        return {
-          gallery_id: id,
-          category_id: parsedCategory.category_id, // Ensure category_id exists
-        };
-      });
+    // Pastikan ada file gambar dan lakukan penghapusan file
+    if (gallery.img) {
+      const filePath = path.join(__dirname, '..', '..', 'uploads', gallery.img.replace('/', ''));
   
-      // Filter out any invalid categories
-      const validCategories = categoryConnections.filter((conn) => conn.category_id);
-  
-      // Create new gallery-category relations in bulk
-      await this.prisma.gallery_categories.createMany({
-        data: validCategories,
+      // Hapus file gambar dari server
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error('Error deleting image:', err);
+        } else {
+          console.log('Image deleted successfully');
+        }
       });
     }
   
-    // Update the gallery with the new data
-    const gallery = await this.prisma.galleries.update({
-      where: { id },
-      data: {
-        name: otherData.name,
-        desc: otherData.desc,
-        img: img || undefined, // Only update the image if a new one is provided
-      },
+    // Hapus gallery dan data terkait
+    await this.prisma.gallery_categories.deleteMany({
+      where: { gallery_id: id },
     });
   
-    return gallery;
-  }  
-  
-
-  async remove(id: string) {
-    await this.findOne(id); // Ensure gallery exists
-    await this.prisma.gallery_categories.deleteMany({
-      where: {gallery_id: id}
-    })
-    return this.prisma.galleries.delete({
+    await this.prisma.galleries.delete({
       where: { id },
     });
   }
+
+  async update(id: string, updateGalleryDto: any) {
+    const { img, categories, ...otherData } = updateGalleryDto;
+  
+    // Menghapus gambar lama jika tidak ada gambar baru yang diupload
+    const gallery = await this.prisma.galleries.findUnique({ where: { id } });
+    if (gallery && img === null && gallery.img) {
+      // Hapus gambar dari penyimpanan jika gambar dihapus
+      const imagePath = `./uploads${gallery.img}`;
+      try {
+        fs.unlinkSync(imagePath); // Menghapus gambar lama dari server
+      } catch (err) {
+        console.error('Error deleting file:', err);
+      }
+    }
+  
+    // Update galeri dengan data baru
+    const updatedGallery = await this.prisma.galleries.update({
+      where: { id },
+      data: {
+        ...otherData,
+        img: img || undefined, // Update gambar jika ada gambar baru
+      },
+    });
+  
+    return updatedGallery;
+  }  
 
   async like(id: string) {
     console.log(id)

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, UploadedFile, UseInterceptors, Req, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, UploadedFile, UseInterceptors, Req, Put, NotFoundException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express'; // Import diskStorage from multer
 import { diskStorage } from 'multer';
 import { PostsService } from './posts.service';
@@ -13,6 +13,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Permissions } from 'src/auth/decorators/permissions.decorator';
 import { PermissionsGuard } from 'src/auth/guards/permissions.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
+import * as fs from 'fs';
 
 @ApiTags('Posts')
 @Controller('posts')
@@ -88,7 +89,6 @@ export class PostsController {
   @ApiParam({ name: 'id', description: 'Post ID', required: true })
   @ApiResponse({ status: 200, description: 'Post successfully updated.' })
   @ApiResponse({ status: 404, description: 'Post not found.' })
-  @ApiResponse({ status: 400, description: 'Bad Request.' })
   @UseInterceptors(FileInterceptor('img', {
     storage: diskStorage({
       destination: './uploads',
@@ -103,17 +103,64 @@ export class PostsController {
   async update(
     @Param('id') id: string,
     @Body() updatePostDto: any,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: Express.Multer.File
   ) {
-    const fileUrl = file ? `/${file.filename}` : null;
+    const post = await this.postsService.findOne(id);
+    if (!post) {
+      throw new NotFoundException(`Post with ID ${id} not found`);
+    }
 
-    const {img, ...rest} = updatePostDto
-    const updatedGalleryDto = {
-      ...rest,
-      img: fileUrl, // Attach the image URL directly at the root level
+    // Delete old image if new image is uploaded
+    if (file && post.img) {
+      const oldImagePath = `./uploads${post.img}`;
+      try {
+        fs.unlinkSync(oldImagePath);
+      } catch (err) {
+        console.error('Error deleting file:', err);
+      }
+    }
+
+    // Remove image if img is set to null
+    if (updatePostDto.img === null && post.img) {
+      const oldImagePath = `./uploads${post.img}`;
+      try {
+        fs.unlinkSync(oldImagePath);
+      } catch (err) {
+        console.error('Error deleting file:', err);
+      }
+      post.img = null;
+    }
+
+    const updatedPostDto = {
+      ...updatePostDto,
+      img: file ? `/${file.filename}` : post.img,
     };
 
-    return this.postsService.update(id, updatedGalleryDto);
+    return this.postsService.update(id, updatedPostDto);
+  }
+
+  @Delete(':id')
+  @Permissions('delete-post')
+  @ApiOperation({ summary: 'Delete a post by ID' })
+  @ApiParam({ name: 'id', description: 'Post ID', required: true })
+  @ApiResponse({ status: 204, description: 'Post successfully deleted.' })
+  @ApiResponse({ status: 404, description: 'Post not found.' })
+  async remove(@Param('id') id: string) {
+    const post = await this.postsService.findOne(id);
+    if (!post) {
+      throw new NotFoundException(`Post with ID ${id} not found`);
+    }
+
+    if (post.img) {
+      const imagePath = `./uploads${post.img}`;
+      try {
+        fs.unlinkSync(imagePath);
+      } catch (err) {
+        console.error('Error deleting file:', err);
+      }
+    }
+
+    await this.postsService.remove(id);
   }
 
   @Put('like/:id')
@@ -128,16 +175,6 @@ export class PostsController {
     @Param('id') id: string,
   ) {
     return this.postsService.dislike(id);
-  }
-
-  @Delete(':id')
-  @Permissions('delete-post')
-  @ApiOperation({ summary: 'Delete a post by ID' })
-  @ApiParam({ name: 'id', description: 'Post ID', required: true })
-  @ApiResponse({ status: 204, description: 'Post successfully deleted.' })
-  @ApiResponse({ status: 404, description: 'Post not found.' })
-  async remove(@Param('id') id: string) {
-    return this.postsService.remove(id);
   }
 
   @Post(':id/comments')

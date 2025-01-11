@@ -32,6 +32,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Permissions } from 'src/auth/decorators/permissions.decorator';
 import { PermissionsGuard } from 'src/auth/guards/permissions.guard';
+import * as fs from 'fs';
 @ApiTags('Gallery')
 @Controller('gallery')
 // @UseGuards(RolesGuard, JwtAuthGuard, PermissionsGuard)
@@ -114,20 +115,6 @@ export class GalleryController {
     return this.galleryService.findOne(id);
   }
 
-  @Put('like/:id')
-  async like(
-    @Param('id') id: string,
-  ) {
-    return this.galleryService.like(id);
-  }
-
-  @Put('dislike/:id')
-  async dislike(
-    @Param('id') id: string,
-  ) {
-    return this.galleryService.dislike(id);
-  }
-
   @Patch(':id')
   @ApiOperation({ summary: 'Update a gallery by ID' })
   @ApiParam({ name: 'id', description: 'Gallery ID', required: true })
@@ -152,20 +139,26 @@ export class GalleryController {
     @Body() updateGalleryDto: any,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    // Construct the file URL if a new image was uploaded
-    const fileUrl = file ? `/${file.filename}` : null;
-
-    // Prepare the updated gallery DTO
-    const updatedGalleryDto = {
-      ...updateGalleryDto,
-      img: fileUrl, // Attach the new image URL if available, otherwise keep the old one
-    };
-
-    // Ensure gallery exists before updating
     const gallery = await this.galleryService.findOne(id);
     if (!gallery) {
       throw new NotFoundException(`Gallery with ID ${id} not found`);
     }
+
+    // Menghapus gambar lama jika ada dan tidak ada gambar baru yang diupload
+    if (!file && gallery.img) {
+      const imagePath = `./uploads${gallery.img}`;
+      try {
+        fs.unlinkSync(imagePath); // Menghapus gambar lama dari penyimpanan
+      } catch (err) {
+        console.error('Error deleting file:', err);
+      }
+    }
+
+    // Menyusun DTO pembaruan dengan gambar baru jika ada
+    const updatedGalleryDto = {
+      ...updateGalleryDto,
+      img: file ? `/${file.filename}` : gallery.img, // Jika gambar baru diupload, update gambar
+    };
 
     return this.galleryService.update(id, updatedGalleryDto);
   }
@@ -175,9 +168,42 @@ export class GalleryController {
   @ApiParam({ name: 'id', description: 'Gallery ID', required: true })
   @ApiResponse({ status: 204, description: 'Gallery successfully deleted.' })
   @ApiResponse({ status: 404, description: 'Gallery not found.' })
-  async remove(@Param('id') id: string): Promise<galleries> {
-    return this.galleryService.remove(id);
+  async remove(@Param('id') id: string): Promise<void> {
+    const gallery = await this.galleryService.findOne(id);
+    
+    if (!gallery) {
+      throw new NotFoundException(`Gallery with ID ${id} not found`);
+    }
+
+    // Menghapus gambar jika ada
+    if (gallery.img) {
+      // Hapus gambar dari penyimpanan
+      const imagePath = `./uploads${gallery.img}`;
+      try {
+        fs.unlinkSync(imagePath); // Menghapus file gambar
+      } catch (err) {
+        console.error('Error deleting file:', err);
+      }
+    }
+
+    // Menghapus galeri dari database
+    await this.galleryService.remove(id);
   }
+
+  @Put('like/:id')
+  async like(
+    @Param('id') id: string,
+  ) {
+    return this.galleryService.like(id);
+  }
+
+  @Put('dislike/:id')
+  async dislike(
+    @Param('id') id: string,
+  ) {
+    return this.galleryService.dislike(id);
+  }
+
   @Post(':id/comments')
   @ApiOperation({ summary: 'Add a comment to a gallery' })
   @ApiParam({ name: 'id', description: 'Gallery ID', required: true })

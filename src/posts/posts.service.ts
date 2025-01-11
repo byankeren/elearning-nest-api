@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class PostsService {
@@ -108,71 +110,72 @@ export class PostsService {
   }
 
   async update(id: string, updatePostDto: any) {
-    console.log(updatePostDto)
-    let { user_id, title, desc, content, img, categories } = updatePostDto;
-    const slug = title.toLowerCase().split(" ").join("-")
-    // Prepare the data for creating a new gallery entry
-    let postData = {
-      title,
-      slug,
-      user_id,
-      desc,
-      img, // Image URL from the file upload
-    };
-  
-    // Delete existing gallery-category relations
-    await this.prisma.post_category.deleteMany({
-      where: {
-        post_id: id,
-      },
-    });
-  
-    // If categories are provided, create new gallery-category relations
+    const { title, desc, content, img, categories } = updatePostDto;
+    const slug = title ? title.toLowerCase().split(' ').join('-') : undefined;
+
+    const existingPost = await this.findOne(id);
+
+    if (!existingPost) {
+      throw new NotFoundException(`Post with ID ${id} not found`);
+    }
+
     if (categories && Array.isArray(categories)) {
-      // Map over the categories and prepare the data
+      await this.prisma.post_category.deleteMany({
+        where: { post_id: id },
+      });
+
       const categoryConnections = categories.map((category) => {
-        // Parse category string if necessary
-        const parsedCategory = typeof category === 'string' ? JSON.parse(category) : category;
-  
+        const parsedCategory =
+          typeof category === 'string' ? JSON.parse(category) : category;
         return {
           post_id: id,
-          category_id: parsedCategory.category_id, // Ensure category_id exists
+          category_id: parsedCategory.category_id,
         };
       });
-  
-      // Filter out any invalid categories
-      const validCategories = categoryConnections.filter((conn) => conn.category_id);
-  
-      // Create new gallery-category relations in bulk
+
+      const validCategories = categoryConnections.filter(
+        (conn) => conn.category_id,
+      );
+
       await this.prisma.post_category.createMany({
         data: validCategories,
       });
     }
 
-    const existingPost = await this.prisma.posts.findFirst({
-      where: { id }
-    })
-    if (!img) {
-      img = existingPost.img
-    }
-    // Update the gallery with the new data
-    const post = await this.prisma.posts.update({
+    const updatedPost = await this.prisma.posts.update({
       where: { id },
       data: {
-        title: postData.title,
-        slug: postData.slug,
-        desc: postData.desc,
-        img: img,
+        title,
+        slug,
+        desc,
+        img,
       },
     });
-    await this.prisma.post_details.updateMany({
+
+    if (content) {
+      await this.prisma.post_details.updateMany({
+        where: { post_id: id },
+        data: { content },
+      });
+    }
+
+    return updatedPost;
+  }
+
+  async remove(id: string) {
+    await this.findOne(id);
+
+    await this.prisma.post_details.deleteMany({
       where: { post_id: id },
-      data: {
-        content: content,
-      },
     });
-  
-    return post;
+
+    await this.prisma.post_category.deleteMany({
+      where: { post_id: id },
+    });
+
+    return await this.prisma.posts.delete({
+      where: { id },
+    });
   }
 
   async like(id: string) {
@@ -201,21 +204,6 @@ export class PostsService {
     }
 
     return post;
-  }
-
-  async remove(id: string) {
-    // Hapus data terkait di tabel `post_details`
-    await this.prisma.post_details.deleteMany({
-      where: { post_id: id },
-    });
-    await this.prisma.post_category.deleteMany({
-      where: { post_id: id },
-    });
-  
-    // Hapus data di tabel `posts`
-    return await this.prisma.posts.delete({
-      where: { id },
-    });
   }
 
   async addComment(postId: string, content: string) {
