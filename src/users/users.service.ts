@@ -88,6 +88,24 @@ export class UsersService {
     });
   }
 
+  async deletePhoto(userId: string) {
+    // Cari user berdasarkan ID
+    const user = await this.findOne(userId);
+  
+    if (!user.image) {
+      throw new NotFoundException(`User with ID ${userId} does not have a photo.`);
+    }
+  
+    const fs = require('fs');
+    fs.unlinkSync(user.image);
+  
+    // Reset data `image` di database menjadi null
+    return this.prisma.users.update({
+      where: { id: userId },
+      data: { image: null },
+    });
+  }  
+
   async like(id: string) {
     const post = await this.prisma.users.findUnique({
       where: { id },

@@ -130,6 +130,7 @@ export class UsersController {
       throw new BadRequestException('Failed to delete image');
     }
   }
+  
   @Post(':id/comments')
   @ApiOperation({ summary: 'Add a comment to a user' })
   @ApiParam({ name: 'id', description: 'User ID', required: true })
